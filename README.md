@@ -1,3 +1,17 @@
+# v11 — Live pitch accuracy bar
+
+A visual frequency deviation meter is now available in **Daily Practice → Guided Riyaz** and **Sur Quest**. It uses the current note's expected pitch, calculated from the selected bansuri Sa.
+
+- **Green (±35 cents)**: close to target, encouraging accuracy.
+- **Yellow (36–70 cents)**: moderately sharp or flat; gently adjust.
+- **Red (more than 70 cents)**: noticeably off target, or an octave mismatch.
+- **Neutral (no score)**: microphone off, silence, no reliable pitch, or a beat marked as rest.
+
+The black needle moves left if flat and right if sharp. Numerical cents are supplied as text alongside the colour indication for accessibility. It does not confuse microphone silence with poor playing. Sur Quest Learn mode still needs three consecutive accurate readings before advancing. This meter is visual feedback and **not** a validated measure of performance quality; environmental noise and harmonics can distort frequency estimates.
+
+**Restore source:** https://github.com/medhrk/bansuri-guru/tree/restore/pre-live-pitch-meter-2026-11-22
+
+---
 # v10 — A4 standard preset and octave-aware guidance
 
 Changes on 22 November 2026:

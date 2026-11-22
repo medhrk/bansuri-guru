@@ -1,6 +1,6 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js';
 import {getAuth, GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js';
-import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,query,where,limit,getDocs,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
+import {getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,collection,query,where,limit,getDocs,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
 let app=null,auth=null,db=null,user=null,hasUploaded=false,auto=false,writeTimer=null;const state={get ready(){return !!auth},get user(){return user},get hasUploaded(){return hasUploaded},configure,login,logout,upload,download,queueSave,setAuto,disableAuto,publishPublicSong,unpublishPublicSong,listPublicSongs};window.cloudRiyaz=state;window.dispatchEvent(new Event('bansuri-cloud-ready'));
 function userDoc(){if(!user||!db)throw Error('Sign in first');return doc(db,'users',user.uid,'practice','current')}
 async function configure(c){if(auth){if(app.options.projectId!==c.projectId)throw Error('A different Firebase project is already active. Refresh to change projects.');return}if(!c||!c.apiKey||!c.authDomain||!c.projectId||!c.appId)throw Error('Missing Firebase web configuration');app=initializeApp({apiKey:c.apiKey,authDomain:c.authDomain,projectId:c.projectId,appId:c.appId});auth=getAuth(app);db=getFirestore(app);onAuthStateChanged(auth,u=>{user=u;if(!u){hasUploaded=false;auto=false;document.getElementById('autoCloud').checked=false}document.getElementById('cloudStatus').textContent=u?'Signed in as '+(u.email||u.uid)+'. Choose upload or restore.':'Firebase ready. Sign in with Google.'})}
@@ -14,10 +14,8 @@ function publicDoc(id){if(!db)throw Error('Connect Firebase in Google & Backup f
 async function publishPublicSong(song,id){
  if(!user)throw Error('Sign in with Google before publishing.');
  const entry=sanitizeSong(song),date=new Date().toISOString(),ref=publicDoc(id);
- const previous=await getDoc(ref);
- if(previous.exists()&&previous.data().ownerUid!==user.uid)throw Error('This publication belongs to another user.');
- const data={...entry,ownerUid:user.uid,isPublic:true,publishedAt:previous.exists()?previous.data().publishedAt:date,updatedAt:date};
- await setDoc(ref,data);
+ if(song.publicId===id){await updateDoc(ref,{...entry,updatedAt:date})}
+ else {await setDoc(ref,{...entry,ownerUid:user.uid,isPublic:true,publishedAt:date,updatedAt:date})}
  return id;
 }
 async function unpublishPublicSong(id){if(!user)throw Error('Sign in with Google to unpublish.');await deleteDoc(publicDoc(id))}

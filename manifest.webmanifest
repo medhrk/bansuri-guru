@@ -1,0 +1,15 @@
+{
+  "name": "Bansuri Guru — Daily Flute Practice",
+  "short_name": "Bansuri Guru",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f4ec",
+  "theme_color": "#183d32",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

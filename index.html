@@ -52,7 +52,21 @@ const lessons=[['Basic sargam',"S R G M P D N S'"],['Sargam reverse',"S' N D P M
 $('exercises').innerHTML=lessons.map((l,i)=>'<div class="exercise"><h3>'+l[0]+'</h3><div class="note">'+l[1]+'</div><button style="margin-top:8px" onclick="playline(lessons['+i+'][1])">▶ Play reference</button></div>').join('');
 function songAdd(){const title=$('songtitle').value.trim();if(!title)return alert('Enter a title');s.songs.push({title,film:$('film').value.trim(),notation:$('notation').value.slice(0,3000)});saveStore();songsDraw();stats();$('songtitle').value=$('film').value=$('notation').value=''}
 function songsDraw(){const box=$('songlist');box.textContent='';for(const [i,x] of s.songs.entries()){const row=document.createElement('div');row.className='song';const t=document.createElement('b');t.textContent=x.title+' — '+x.film;const p=document.createElement('p');p.textContent=x.notation||'No notation yet';const btn=document.createElement('button');btn.textContent='▶ Play notes';btn.onclick=()=>playline(x.notation);const del=document.createElement('button');del.textContent='Delete';del.onclick=()=>{if(confirm('Delete this song?')){s.songs.splice(i,1);saveStore();songsDraw();stats()}};row.append(t,p,btn,del);box.append(row)}if(!s.songs.length)box.textContent='No songs yet. Add one to start.'}
-let stream,analyser,micFrame,source;function corr(x,rate){let sum=0;for(let i=0;i<x.length;i++)sum+=x[i]*x[i];if(Math.sqrt(sum/x.length)<.015)return 0;let best=0,score=0;for(let k=Math.floor(rate/1200);k<Math.min(x.length/2,Math.floor(rate/90));k++){let c=0;for(let i=0;i<x.length-k;i+=2)c+=x[i]*x[i+k];if(c>score){score=c;best=k}}return best?rate/best:0}
+let stream,analyser,micFrame,source;function corr(x,rate){
+ let energy=0,mean=0;for(let i=0;i<x.length;i++){energy+=x[i]*x[i];mean+=x[i]}if(Math.sqrt(energy/x.length)<.012)return 0;
+ mean/=x.length;
+ const minLag=Math.max(2,Math.floor(rate/1500)),maxLag=Math.min(Math.floor(rate/90),Math.floor(x.length/2)-1);
+ const values=new Float32Array(maxLag+1);let strongest=0;
+ for(let lag=minLag;lag<=maxLag;lag++){let dot=0,e1=0,e2=0;for(let i=0;i<x.length-lag;i+=2){let a=x[i]-mean,b=x[i+lag]-mean;dot+=a*b;e1+=a*a;e2+=b*b}let c=e1&&e2?dot/Math.sqrt(e1*e2):0;values[lag]=c;if(c>strongest)strongest=c}
+ if(strongest<.55)return 0;
+ let chosen=0;const threshold=Math.max(.60,strongest*.88);
+ for(let lag=minLag+1;lag<maxLag;lag++){if(values[lag]>=threshold&&values[lag]>=values[lag-1]&&values[lag]>=values[lag+1]){chosen=lag;break}}
+ if(!chosen){for(let lag=minLag;lag<=maxLag;lag++){if(values[lag]>=strongest-.002){chosen=lag;break}}}
+ if(!chosen)return 0;
+ const left=values[chosen-1]||0,mid=values[chosen],right=values[chosen+1]||0,den=left-2*mid+right;
+ const offset=Math.abs(den)>1e-5?Math.max(-.5,Math.min(.5,.5*(left-right)/den)):0;
+ return rate/(chosen+offset)
+}
 function track(){if(!analyser)return;const x=new Float32Array(analyser.fftSize);analyser.getFloatTimeDomainData(x);const hz=corr(x,ac().sampleRate);if(hz){const midi=69+12*Math.log2(hz/440),n=Math.round(midi),names=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];$('pitch').textContent=names[((n%12)+12)%12]+(Math.floor(n/12)-1);$('hz').textContent=hz.toFixed(1)+' Hz | '+Math.round((midi-n)*100)+' cents';}else {$('pitch').textContent='—';$('hz').textContent='Play one steady note'}micFrame=requestAnimationFrame(track)}
 async function micToggle(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;source.disconnect();analyser=null;cancelAnimationFrame(micFrame);$('micbtn').textContent='Enable microphone';return}try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});source=ac().createMediaStreamSource(stream);analyser=ac().createAnalyser();analyser.fftSize=2048;source.connect(analyser);$('micbtn').textContent='Stop microphone';track()}catch(e){alert('Microphone unavailable: '+e.message)}}
 let drone=[];function droneToggle(){if(drone.length){drone.forEach(o=>o.stop());drone=[];$('dronebtn').textContent='▶ Drone';return}for(const hz of [s.sa,s.sa*1.5,s.sa*2]){const o=ac().createOscillator(),g=ac().createGain();o.frequency.value=hz;o.type='sine';g.gain.value=.035;o.connect(g).connect(ac().destination);o.start();drone.push(o)}$('dronebtn').textContent='■ Stop drone'}

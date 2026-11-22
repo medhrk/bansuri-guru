@@ -1,3 +1,14 @@
+# v10 — A4 standard preset and octave-aware guidance
+
+Changes on 22 November 2026:
+- Removed special 436 Hz A-flute preset from the global practice selector, Daily Practice, and Sur Quest.
+- A-scale Sa defaults to 440 Hz (A4) for new users; prior saved 436 Hz presets are normalized to 440 when loaded locally or restored/uploaded through Firestore. Other custom Sa values remain unchanged.
+- Guided Riyaz, Sur Quest, and Raag/Taal practice now distinguish a note one octave high or low from a merely sharp/flat note. Octave mismatches **do not count as correct**: a harmonic or genuinely incorrect octave is not graded as accurate.
+- Pitch detection remains experimental. Misidentified harmonics may still occur. Test in a quiet room, with a stable note and no loud reference speaker.
+
+Restore before v10: https://github.com/medhrk/bansuri-guru/tree/restore/pre-octave-detection-v10-2026-11-22
+
+---
 # Live bansuri selector — v9
 
 The practice screens now include a persistent **My bansuri** selector above the lesson content, visible in Daily Practice, Sur Quest, Raag/Taal/Bhakti, Sargam and Sur/Taal. It defaults to the currently saved Sa. It offers **A scale / measured Sa 436 Hz**, **A4 / 440 Hz**, A3, C4/C5, D5, G4 and E4, plus any custom measured Sa. Changing preset updates saved `s.sa` immediately and refreshes reference pitches and active note targets in Guided Riyaz and Sur Quest. The independent Daily Practice and Sur Quest selectors continue to work and synchronize. The existing Firestore backup schema already stores `sa`, so no migration or extra Firebase permissions are necessary.

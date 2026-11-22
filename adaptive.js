@@ -4,7 +4,7 @@
 const NOTE_ORDER=["S","R","G","M","P","D","N","S'"];
 const NOTE_NAMES={S:"Sa",R:"Re",G:"Ga",M:"Ma",P:"Pa",D:"Dha",N:"Ni","S'":"Upper Sa"};
 function data(){s.quest=s.quest||{};s.quest.noteAttempts=Array.isArray(s.quest.noteAttempts)?s.quest.noteAttempts:[];return s.quest}
-function recent(){return data().noteAttempts.slice(-250).filter(x=>NOTE_ORDER.includes(x.note)&&x.samples>=3&&!x.skipped&&Number.isFinite(x.inTune))}
+function recent(){return data().noteAttempts.slice(-250).filter(x=>NOTE_ORDER.includes(x.note)&&x.samples>=3&&!x.skipped&&Number.isFinite(x.inTune)&&Number(x.sa)>0&&Math.abs(1200*Math.log2(Number(x.sa)/(Number(s.sa)||440)))<100)}
 function report(){
  const group=new Map(NOTE_ORDER.map(n=>[n,{note:n,attempts:0,samples:0,good:0,absCents:0}]));
  for(const a of recent()){const g=group.get(a.note);g.attempts++;g.samples+=a.samples;g.good+=a.inTune;g.absCents+=(Number(a.meanAbsCents)||0)*a.samples}
@@ -33,7 +33,7 @@ function record(records,lesson,mode){
  for(const a of records){
   if(!NOTE_ORDER.includes(a.note))continue;
   const samples=Math.max(0,Math.min(500,Number(a.samples)||0)),good=Math.max(0,Math.min(samples,Number(a.inTune)||0));
-  d.noteAttempts.push({note:a.note,samples,inTune:good,meanAbsCents:samples?Math.round((Number(a.totalAbsCents)||0)/samples):null,skipped:!!a.skipped,steady:!!a.steady,day,lesson:String(lesson).slice(0,40),mode:String(mode).slice(0,20)});
+  d.noteAttempts.push({note:a.note,samples,inTune:good,meanAbsCents:samples?Math.round((Number(a.totalAbsCents)||0)/samples):null,skipped:!!a.skipped,steady:!!a.steady,day,lesson:String(lesson).slice(0,40),mode:String(mode).slice(0,20),sa:Number(s.sa)||440});
  }
  d.noteAttempts=d.noteAttempts.slice(-400);
 }

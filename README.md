@@ -1,3 +1,21 @@
+# v16 — Community Bollywood Sargam Sharing
+
+Users may now optionally publish their own authorized song notations from **Song Notebook**.
+
+- Songs remain **private by default**. Each saved song has a **Make public** button; authors must sign in via the existing Google/Firebase connection and confirm that the notation may be shared.
+- The separate Firestore `publicSongs` collection stores only the song title, film/artist label, authored notation, publication timestamps, and a Firebase account ownership ID. Other user's notes and private logs are **never** read from this collection.
+- Published contributions appear in a searchable **Community Bollywood Notations** section with sargam playback and copy controls. These are unverified community submissions, not official musical scores.
+- The author can **Unpublish**, leaving their private entry intact. Private edits to a published notation **do not** silently change the shared copy: choose **Update public copy** after saving changes.
+- If the user deletes a locally saved published song, the app attempts remote unpublication first and aborts deletion on failure.
+- Guest users can view published notes once the shared Firebase app is configured; only a signed-in owner may publish, edit or unpublish their own entry.
+- **Deployment requirement:** manually publish the repository's updated `firestore.rules` from Firebase Console → Firestore Database → Rules. GitHub/Cloudflare deployment does not deploy Firebase rules. Existing personal backup rules remain private.
+- The community feed loads up to 80 public notes; moderation/reporting, pagination and reliable copyright review need backend development before large-scale community growth.
+- Do not share full copyrighted lyrics, transcriptions you lack permission to distribute, or personal identifying information in public notations.
+
+Rollback source: https://github.com/medhrk/bansuri-guru/tree/restore/pre-community-songs-v14-2026-11-22
+
+---
+
 # v15 — Preserve Song Notebook + expand Sargam & Raag
 
 The existing **My Bollywood song notebook** is preserved rather than replaced. It still stores the user's title, film/artist, custom sargam notation and original playback/delete actions. Existing `s.songs` records remain backward compatible. Enhancements:

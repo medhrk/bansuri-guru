@@ -1,4 +1,6 @@
-# Bansuri Guru — Phase 1 MVP
+# Bansuri Guru — Phase 2 (Google Login + Cloud Backup)
+
+An original, lightweight daily bansuri practice web app. **Phase 2 source code now includes Google sign-in and optional private Firestore backups.** See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for required Firebase project setup and security rules. The earlier Google Calendar OAuth JSON is *not* the Firebase web app configuration.
 
 An original, lightweight daily bansuri practice web app. Works without a server backend. Includes local practice planner, timer, logs, sargam audio reference, microphone pitch estimation, taal metronome, song notebook, curated resource links, offline .ics calendar export and OAuth-based Google Calendar event creation (once configured).
 
@@ -9,7 +11,7 @@ Publish this repository using **Cloudflare Pages**: Workers & Pages → Create �
 Create a Google Cloud OAuth Web Application client ID, configure OAuth consent, add your hosted HTTPS origin to Authorized JavaScript origins, enable Google Calendar API, then enter the **public** Client ID under Google & Backup. Never insert client secrets into browser code. Calendar event creation requests the Calendar events scope explicitly. Repeated syncs create duplicate events.
 
 ## Current limits
-This is an MVP. No Google account login or cloud storage yet. History is saved in localStorage. Microphone requires a secure browser origin and user permission. Reference audio is synthetic. Bollywood scores are **not** bundled, to respect copyright. No payments or paid services are active.
+This is an MVP. Google sign-in and cloud backup require explicit Firebase project configuration, and have not been validated against your live Firebase project yet. History is saved in localStorage. Microphone requires a secure browser origin and user permission. Reference audio is synthetic. Bollywood scores are **not** bundled, to respect copyright. No payments or paid services are active.
 
 ## Roadmap
 - Phase 2: Firebase Google sign-in, secure multi-user database rules, cloud practice sync and note accuracy feedback.

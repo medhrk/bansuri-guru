@@ -19,7 +19,8 @@ function render(){
   const notes=document.createElement("pre");notes.textContent=x.notation;
   const play=makeButton("♫ Play sargam",()=>{try{playline(x.notation)}catch(e){status("Could not play notation: "+e.message)}});
   const copy=makeButton("Copy notes",async()=>{try{await navigator.clipboard.writeText(x.notation);status("Notation copied. Please credit the contributor if you reuse it.")}catch(e){status("Copy unavailable: "+e.message)}});
-  row.append(title,sub,notes,play,copy);
+  const learn=makeButton("🎯 Learn step by step",()=>{const studio=window.bansuriSongStudio;if(!studio){status("Song teacher is unavailable. Reload the page.");return}studio.openCommunity(x)});
+  row.append(title,sub,notes,play,copy,learn);
   if(window.cloudRiyaz?.user?.uid===x.ownerUid){
     row.append(makeButton("Unpublish my note",async()=>{if(!confirm("Remove this notation from public browsing? Your private notes will remain."))return;try{await unpublishById(x.id);status("Publication removed.");await refresh()}catch(e){status("Could not unpublish: "+e.message)}}))
   }

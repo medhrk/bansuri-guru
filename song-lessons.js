@@ -35,13 +35,14 @@ const $=id=>document.getElementById(id);
 let selected=null,filter="All",phraseSession=null;
 function form(){
  const el=$("songLessonStudio");if(!el)return;
+ if(Array.isArray(s.songs)){let changed=false;for(const item of s.songs){if(!item.lessonId){item.lessonId=crypto.randomUUID().replace(/-/g,"");changed=true}}if(changed)saveStore()}
  el.innerHTML='<div class="song-studio-head"><div><span class="song-studio-kicker">LEARN • PRACTISE • PERFORM</span><h2>Song Learning Studio</h2></div><span class="pill">A-scale friendly</span></div><p>Turn your saved or community sargam into a guided, note-by-note flute lesson. Original practice melodies are available even before you save songs.</p><div class="song-studio-controls"><label>Explore<select id="songLessonFilter"><option>All</option><option>Bollywood</option><option>Bhakti</option><option>Other</option></select></label><label>Find a lesson<input id="songLessonFind" placeholder="Search titles, film, notes"></label></div><div id="songLessonList" class="song-lesson-list"></div><div id="songLessonDetail" class="song-lesson-detail" aria-live="polite"></div>';
  $("songLessonFilter").onchange=e=>{filter=e.target.value;draw()};
  $("songLessonFind").oninput=draw;
  draw();
 }
 function lessons(){
- const privateItems=(Array.isArray(s.songs)?s.songs:[]).map((x,i)=>({...x,kind:x.kind||"Bollywood",source:"My notebook",key:"private-"+i,privateIndex:i}));
+ const privateItems=(Array.isArray(s.songs)?s.songs:[]).map((x,i)=>({...x,kind:x.kind||"Bollywood",source:"My notebook",key:"private-"+(x.lessonId||i),privateIndex:i}));
  return [...exercises.map(x=>({...x,source:"Original exercises",key:x.id})),...privateItems];
 }
 function draw(){
@@ -72,7 +73,7 @@ function select(item){
  detail.append(help);
  const actions=document.createElement("div");actions.className="row";
  const listen=document.createElement("button");listen.textContent="♫ Hear my notes";listen.onclick=()=>{try{const base=Number(s.sa)||440;parsed.notes.forEach((n,i)=>{if(n!=="—"&&semitones[n]!==undefined)tone(base*Math.pow(2,semitones[n]/12),i*.57,.39)})}catch(e){alert("Could not play: "+e.message)}};
- const begin=document.createElement("button");begin.className="primary";begin.textContent="🎯 Guided lesson";begin.onclick=()=>openLesson(item,parsed);
+ const begin=document.createElement("button");begin.className="primary";begin.textContent="🎯 Practice full song";begin.onclick=()=>openLesson(item,parsed);
  actions.append(listen,begin);detail.append(actions);
  const phraseArea=document.createElement("div");phraseArea.className="song-phrase-coach";phraseArea.id="songPhraseCoach";detail.append(phraseArea);
  phraseSession={item,parsed,index:0};renderPhraseCoach();detail.scrollIntoView({block:"nearest",behavior:"smooth"});
@@ -138,7 +139,7 @@ function openLesson(item,parsed){
 function openCommunity(item){
  const p=parse(item.notation);
  if(p.error){alert(p.error);return}
- openLesson({title:item.title,kind:"Community",source:"Community shared notation",key:item.id},p);
+ tab("songs");select({title:item.title,film:item.film||"",notation:item.notation,kind:"Bollywood",source:"Community shared notation",key:"community-"+item.id});
 }
 function refresh(){draw()}
 window.bansuriSongStudio={parse,refresh,openCommunity};

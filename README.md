@@ -1,3 +1,20 @@
+# v19 — Guided Bollywood and Bhakti Song Learning Studio
+
+A **Song Learning Studio** now appears at the top of **Song Notebook**. Learners can filter original practice melodies and their personal saved notes by **Bollywood**, **Bhakti**, or **Other**, search them by title or notation, listen to a synthesized note reference, and launch a guided Sur Quest lesson with the same notation.
+
+- **Four new original examples**, not transcriptions of copyrighted songs: Krishna Morning, Ganesha Greeting, Rama Evening, and Cinema Mood.
+- Saved songs can be categorized during create/edit, without changing existing song content. Previous entries default to the Bollywood filter unless explicitly classified.
+- Supports spaced note symbols S R G M P D N S', chromatic Hindustani forms r g d n / M^, ordinary aliases Sa Re Ga Ma Pa Dha Ni, rests and phrase separators.
+- The lesson parser rejects unsupported tokens including lyrics, and caps guided lessons at 96 note/rest events. Long pieces can be split into sections. It does not invent notation.
+- **Community Bollywood Notations → Learn step by step** opens contributed notation using the same Sur Quest teacher, subject to validation.
+- The Sur Quest learning engine already provides microphone pitch feedback, a green/yellow/red accuracy bar, and continuous two-second note holds before advancing. Your selected flute reference (e.g. A4=440 Hz) is respected.
+- Song playback is generated from musical intervals relative to selected Sa; no third-party recordings, arrangements, or copyrighted music are bundled.
+- Firebase backup, private/public distinction, Google sign-in and Firestore security rules are unchanged.
+
+Restore source pre-v19: https://github.com/medhrk/bansuri-guru/tree/restore/pre-song-lessons-v19-2026-11-22
+
+---
+
 # v18 — Sign-in button visibility and stale browser cache fix
 
 After a signed-in user reported seeing both **Sign in with Google** and **Sign out** simultaneously, the account page now uses a redundant, explicit `hidden` attribute and inline `display:none`, synchronized from Firebase's real `onAuthStateChanged` state. The account page shows **Google connected** plus the account email and **Sign out** instead of a redundant sign-in prompt. Configuration options are in an optional "Firebase configuration (advanced)" disclosure and no longer occupy the main account card by default.

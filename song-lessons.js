@@ -33,6 +33,7 @@ function parse(text){
 }
 const $=id=>document.getElementById(id);
 let selected=null,filter="All",phraseSession=null;
+let loopState={running:false,token:0,timer:null,nodes:[],iteration:0,bpm:48,phraseId:""};
 function form(){
  const el=$("songLessonStudio");if(!el)return;
  if(Array.isArray(s.songs)){let changed=false;for(const item of s.songs){if(!item.lessonId){item.lessonId=crypto.randomUUID().replace(/-/g,"");changed=true}}if(changed)saveStore()}
@@ -58,7 +59,7 @@ function draw(){
  if(!filtered.length){const p=document.createElement("p");p.className="muted";p.textContent="No matching lessons. Try a different filter or save your own notation.";list.append(p)}
 }
 function select(item){
- selected=item;const detail=$("songLessonDetail");if(!detail)return;detail.replaceChildren();
+ stopPhraseLoop(false);selected=item;const detail=$("songLessonDetail");if(!detail)return;detail.replaceChildren();
  const title=document.createElement("h3");title.textContent=item.title;
  const parsed=parse(item.notation);
  const sub=document.createElement("p");sub.className="muted";sub.textContent=item.description||"Listen to each phrase, identify the swaras, then play it slowly with your microphone.";
@@ -83,7 +84,75 @@ function phraseKey(item){return "songphrases-"+String(item.key||"unknown")+"-"+S
 function progressStore(){s.songPhraseProgress=s.songPhraseProgress&&typeof s.songPhraseProgress==="object"?s.songPhraseProgress:{};return s.songPhraseProgress}
 function unlocked(item){const x=progressStore()[phraseKey(item)];return Math.max(0,Math.min(95,Number(x?.unlocked)||0))}
 function saveUnlock(item,number,verified=false,score=null){const p=progressStore(),key=phraseKey(item),previous=p[key]||{};const next=Math.max(unlocked(item),number),verifiedPhrases={...(previous.verifiedPhrases||{})};if(verified)verifiedPhrases[number]=Math.max(0,Math.min(100,Math.round(Number(score)||0)));p[key]={unlocked:next,verifiedPhrases,updated:new Date().toISOString()};const keys=Object.keys(p).sort((a,b)=>String(p[a].updated||"").localeCompare(String(p[b].updated||"")));while(keys.length>100)delete p[keys.shift()];saveStore()}
+
+function stopPhraseLoop(announce=true){
+ loopState.token++;
+ if(loopState.timer!==null){clearTimeout(loopState.timer);loopState.timer=null}
+ for(const osc of loopState.nodes){try{osc.stop()}catch{}try{osc.disconnect()}catch{}}
+ loopState.nodes=[];
+ loopState.running=false;
+ if(announce)loopMessage("Loop stopped. Try again or practise with the teacher.");
+ const btn=$("phraseLoopStart");if(btn)btn.textContent="▶ Start loop";
+}
+function loopMessage(text){
+ const el=$("phraseLoopStatus");if(el)el.textContent=text
+}
+function loopSettings(){
+ const bpm=Math.max(35,Math.min(120,Number($("phraseLoopBpm")?.value)||48));
+ const count=Math.max(1,Math.min(8,Number($("phraseLoopCount")?.value)||3));
+ const rise=!!$("phraseLoopRise")?.checked;
+ return {bpm,count,rise}
+}
+function scheduleLoopCycle(seq,bpm){
+ const context=ac(),beat=60/bpm,base=Number(s.sa)||440;
+ const beginning=context.currentTime+.075;
+ seq.forEach((note,i)=>{
+  if(note==="—"||semitones[note]===undefined)return;
+  const frequency=base*Math.pow(2,semitones[note]/12);
+  const oscillator=context.createOscillator(),gain=context.createGain(),at=beginning+i*beat;
+  oscillator.type="sine";oscillator.frequency.setValueAtTime(frequency,at);
+  gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(.095,at+.018);
+  gain.gain.exponentialRampToValueAtTime(.0001,at+Math.max(.1,beat*.82));
+  oscillator.connect(gain);gain.connect(context.destination);
+  oscillator.start(at);oscillator.stop(at+Math.max(.1,beat*.82)+.04);
+  loopState.nodes.push(oscillator);
+ });
+ return Math.ceil((seq.length*beat+.18)*1000)
+}
+async function beginPhraseLoop(){
+ if(!phraseSession)return;
+ stopPhraseLoop(false);
+ const {item,parsed,index}=phraseSession;
+ const seq=parsed.groups[index]?.slice(),settings=loopSettings();
+ if(!seq?.length)return;
+ const sessionId=phraseKey(item)+"-"+index,token=loopState.token;
+ loopState.running=true;loopState.iteration=0;loopState.bpm=settings.bpm;loopState.phraseId=sessionId;
+ const start=$("phraseLoopStart");if(start)start.textContent="■ Stop loop";
+ try{await ac().resume()}catch(e){stopPhraseLoop(false);loopMessage("Audio unavailable: "+e.message);return}
+ if(token!==loopState.token)return;
+ function cycle(){
+  if(!loopState.running||token!==loopState.token)return;
+  const number=++loopState.iteration,bpm=loopState.bpm;
+  loopMessage("Playing repetition "+number+" of "+settings.count+" at "+bpm+" BPM. Listen, then play along.");
+  let wait;
+  try{wait=scheduleLoopCycle(seq,bpm)}catch(e){stopPhraseLoop(false);loopMessage("Audio playback failed: "+e.message);return}
+  loopState.timer=setTimeout(()=>{
+   if(!loopState.running||token!==loopState.token)return;
+   loopState.nodes=[];
+   if(number>=settings.count){
+    stopPhraseLoop(false);
+    loopMessage("✓ "+number+" repetitions completed. Now try microphone-guided phrase practice.");
+    return;
+   }
+   if(settings.rise)loopState.bpm=Math.min(120,loopState.bpm+5);
+   cycle();
+  },wait);
+ }
+ cycle();
+}
+
 function renderPhraseCoach(){
+ stopPhraseLoop(false);
  const outer=$("songPhraseCoach");if(!outer||!phraseSession)return;
  outer.replaceChildren();const {item,parsed}=phraseSession;const total=parsed.groups.length;
  const heading=document.createElement("h3");heading.textContent="🎼 Phrase-by-phrase teacher";outer.append(heading);
@@ -103,6 +172,12 @@ function renderPhraseCoach(){
  };
  const manual=document.createElement("button");manual.textContent="✓ Mark manually practised";manual.onclick=()=>{if(!confirm("Mark this phrase practised without microphone verification? This only unlocks the next phrase; no pitch accuracy is awarded."))return;completePhrase(false)};
  row.append(listen,start,manual);outer.append(row);
+ const loop=document.createElement("div");loop.className="phrase-loop-panel";
+ loop.innerHTML='<h4>🔁 Phrase Loop Trainer</h4><p class="muted">Repeat this phrase at a comfortable tempo. Optionally raise speed by 5 BPM each repetition. Looping is for practice and does not unlock or score a phrase.</p><div class="phrase-loop-settings"><label>Starting tempo (BPM)<input id="phraseLoopBpm" type="number" min="35" max="120" step="5" value="48"></label><label>Repetitions<select id="phraseLoopCount"><option value="2">2 times</option><option value="3" selected>3 times</option><option value="4">4 times</option><option value="6">6 times</option><option value="8">8 times</option></select></label></div><label class="phrase-loop-checkbox"><input type="checkbox" id="phraseLoopRise"> Increase tempo by 5 BPM after each repetition</label><div class="row"><button type="button" class="primary" id="phraseLoopStart">▶ Start loop</button><button type="button" id="phraseLoopSlow">Start slowly (40 BPM)</button></div><p id="phraseLoopStatus" role="status">Ready: listen and play the phrase repeatedly before your guided attempt.</p>';
+ outer.append(loop);
+ $("phraseLoopStart").onclick=()=>loopState.running?stopPhraseLoop():beginPhraseLoop();
+ $("phraseLoopSlow").onclick=()=>{stopPhraseLoop(false);$("phraseLoopBpm").value="40";loopMessage("Set to 40 BPM. Press Start loop when ready.")};
+
  const msg=document.createElement("p");msg.className="muted";msg.id="phraseCoachStatus";msg.textContent="Unlocked "+Math.min(total,unlocked(item)+1)+" of "+total+" phrases. Mastery needs microphone-verified practice.";outer.append(msg);
 }
 function completePhrase(verified,score=null){
@@ -130,6 +205,7 @@ function handleQuestFinish(report){
 window.addEventListener("bansuri-quest-finished",e=>handleQuestFinish(e.detail));
 
 function openLesson(item,parsed){
+ stopPhraseLoop(false);
  if(!window.surQuest?.openExercise){alert("Sur Quest is unavailable. Reload Bansuri Guru and try again.");return}
  const prior=document.querySelector("#quest:not(.hidden)");
  if(!window.surQuest.openExercise({id:"song-"+String(item.key||"community").slice(0,75),name:String(item.title).slice(0,100),kind:(item.kind||"Song")+" notation",bpm:52,seq:parsed.notes.slice(),help:"Play the notes you selected from "+item.source+". Hold each pitch steadily; rest where marked. This is user-supplied notation, not a verified official score."}))return;
@@ -137,11 +213,13 @@ function openLesson(item,parsed){
  if(prior)window.scrollTo({top:0,behavior:"smooth"});
 }
 function openCommunity(item){
+ stopPhraseLoop(false);
  const p=parse(item.notation);
  if(p.error){alert(p.error);return}
  tab("songs");select({title:item.title,film:item.film||"",notation:item.notation,kind:"Bollywood",source:"Community shared notation",key:"community-"+item.id});
 }
 function refresh(){draw()}
+window.addEventListener("pagehide",()=>stopPhraseLoop(false));
 window.bansuriSongStudio={parse,refresh,openCommunity};
 form();
 })();

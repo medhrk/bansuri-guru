@@ -6,6 +6,44 @@ service cloud.firestore {
         && request.auth.uid == userId
         && documentId == 'current';
     }
+    match /publicSongs/{songId} {
+      // Published notation is public, but private practice documents remain owner-only.
+      // A query must constrain isPublic == true.
+      allow get, list: if resource.data.isPublic == true;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['ownerUid', 'title', 'film', 'notation', 'isPublic', 'publishedAt', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['ownerUid', 'title', 'film', 'notation', 'isPublic', 'publishedAt', 'updatedAt'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.isPublic == true
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.film is string
+        && request.resource.data.film.size() <= 200
+        && request.resource.data.notation is string
+        && request.resource.data.notation.size() > 0
+        && request.resource.data.notation.size() <= 3000
+        && request.resource.data.publishedAt is string
+        && request.resource.data.publishedAt.size() <= 40
+        && request.resource.data.updatedAt is string
+        && request.resource.data.updatedAt.size() <= 40;
+      allow update: if request.auth != null
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.publishedAt == resource.data.publishedAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'film', 'notation', 'updatedAt'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.film is string
+        && request.resource.data.film.size() <= 200
+        && request.resource.data.notation is string
+        && request.resource.data.notation.size() > 0
+        && request.resource.data.notation.size() <= 3000
+        && request.resource.data.updatedAt is string
+        && request.resource.data.updatedAt.size() <= 40;
+      allow delete: if request.auth != null && resource.data.ownerUid == request.auth.uid;
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

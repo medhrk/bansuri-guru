@@ -90,7 +90,7 @@ function setPitchMeter(prefix,result){
  const off=result.cents,abs=Math.abs(off);
  const status=abs<=35?'green':abs<=70?'yellow':'red';
  box.dataset.status=status;label.textContent=status==='green'?'✓ In tune':status==='yellow'?'Almost there':'Adjust your sur';
- needle.style.left=(50+Math.max(-50,Math.min(50,off/140*50)))+'%';
+ const delta=abs<=35?abs/35*10:abs<=70?10+(abs-35)/35*24:34+Math.min(16,(abs-70)/70*16);needle.style.left=(50+Math.sign(off)*delta)+'%';
  hint.textContent=(off>0?'Sharp by ':off<0?'Flat by ':'Exactly on target: ')+Math.round(abs)+' cents'+(result.octave?' · Possible octave mismatch':'');
 }
 window.pitchMeterHTML=pitchMeterHTML;window.setPitchMeter=setPitchMeter;

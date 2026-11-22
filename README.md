@@ -1,3 +1,15 @@
+# v17 — Google sign-in button follows live authentication state
+
+- Under **Google & Backup**, **Sign in with Google** is hidden when Firebase confirms the user is already authenticated, including on a reloaded page after session restoration.
+- The **Sign out** button is displayed only when a Google account is signed in; after sign-out, the sign-in option returns.
+- On page load, the app automatically configures Firebase using the locally saved **public** Firebase web config. It waits for Firebase to confirm the restored session rather than showing an incorrect sign-in prompt during that check.
+- Auth state comes exclusively from Firebase's `onAuthStateChanged`; it is not inferred from a manually set localStorage flag. No new Google tokens, credentials, or secrets are persisted.
+- Existing backup, practice and public Bollywood notation sharing workflows are unchanged.
+
+Source restore point: https://github.com/medhrk/bansuri-guru/tree/restore/pre-auth-button-state-2026-11-22
+
+---
+
 # v16 — Community Bollywood Sargam Sharing
 
 Users may now optionally publish their own authorized song notations from **Song Notebook**.

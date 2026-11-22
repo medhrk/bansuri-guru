@@ -1,3 +1,20 @@
+# v12 — Continuous note stability training
+
+**Added:** a visible **Steady note challenge** under the frequency bar in Daily Practice → Guided Riyaz and Sur Quest.
+
+- Hold the displayed swara for **two consecutive seconds** within ±35 cents of the currently selected bansuri Sa.
+- The progress bar accumulates elapsed *time* between consecutive valid microphone readings, not just the count of successful reads.
+- If your note drifts outside tolerance, the microphone loses the clear tone, or the gap between readings exceeds 350 ms, the hold resets.
+- In **Sur Quest Learn mode**, a note now advances after the full continuous two-second hold, instead of three quickly matching samples.
+- Practice and Perform modes continue advancing on rhythm; the hold meter provides feedback without stopping their timed flow.
+- **Guided Riyaz** retains its planned timed stages. Stability is feedback only (not a requirement to advance to the next timed exercise).
+- No microphone means neutral/unscored status. The meter reports pitch stability relative to a note, **not** airflow, musical quality, or performance certification.
+- The existing Firestore data schema is unchanged; no migration needed.
+
+Restore before v12: https://github.com/medhrk/bansuri-guru/tree/restore/pre-stability-trainer-2026-11-22
+
+---
+
 # v11 — Live pitch accuracy bar
 
 A visual frequency deviation meter is now available in **Daily Practice → Guided Riyaz** and **Sur Quest**. It uses the current note's expected pitch, calculated from the selected bansuri Sa.

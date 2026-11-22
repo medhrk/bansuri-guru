@@ -1,3 +1,21 @@
+# C Natural Medium flute frequency correction
+
+**Reported issue:** C flute not recognized when Sa was set to the old site default 261.63 Hz. Many C Natural Medium (C5 Sa) six-hole bansuris play Sa around **523.25 Hz**, with the top three holes covered; models labeled by a different convention or register can differ. Do not automatically overwrite existing people's saved values.
+
+## What changed
+- In **Daily Practice**, choose **C Natural Medium — Sa C5 (523.25 Hz)** and click **Save settings**. Alternatively choose C4 lower octave or enter your measured Sa manually.
+- In **Sur Quest → Calibrate your reference Sa**, select the C5 preset or measure a clear note by microphone. Saving changes the common Sa used by the practice reference tones and pitch guidance.
+- Updated browser pitch autocorrelation to normalize correlations by signal energy to reduce short-lag/harmonic bias. It is still experimental and subject to octave confusion, room noise, breath turbulence and device frequency limits.
+- Old user settings, Firebase records and other tools are retained. **Pre-fix restore:** https://github.com/medhrk/bansuri-guru/tree/restore/pre-c-flute-fix-2026-11-22
+
+## Troubleshooting
+1. Confirm whether the manufacturer's key label refers to three-hole Sa or six-hole base note.
+2. Cover the three upper holes nearest the mouth; play a steady Sa. Set C5 only if that note is approximately C5.
+3. Enable the microphone in Sur Quest and inspect the detected Hz. A reading around 261.6 while playing 523.3, or vice versa, indicates octave confusion in the detector or embouchure; compare with an independent tuner before adjusting the flute.
+4. Avoid playing reference audio through speakers during microphone detection; headphones help avoid accidental feedback.
+5. After deploying, refresh with Cmd+Shift+R and check Cloudflare Workers deployment if changes are not visible.
+
+---
 # Interactive Sur Quest — Concept v2 / Release v6
 
 Bansuri Guru now includes **Sur Quest** (navigation tab). This is the second-generation interactive teaching experience, layered on top of earlier Academy v5.

@@ -1,5 +1,13 @@
 # v21 — Phrase Loop Trainer
 
+The Song Learning Studio phrase coach now offers **Phrase Loop Trainer**: set 35–120 BPM, choose 2, 3, 4, 6 or 8 repetitions, optionally increase tempo by 5 BPM after each repetition, or use a 40 BPM shortcut. The app synthesizes only the sargam reference notes relative to the selected Sa; rests remain silent. Start / Stop controls cancel pending scheduled tones. Loops also stop when switching phrases, opening a guided lesson, leaving Song Notebook, or backgrounding the page. Loop completion does not award pitch scores or unlock phrases; those remain in the separate microphone-guided lesson or explicitly unverified manual action.
+
+This is browser-based reference playback, not analysis of actual played notes. The live Cloudflare deployment and browser audio still require on-device verification.
+
+---
+
+# v21 — Phrase Loop Trainer
+
 In **Song Notebook → Song Learning Studio → Study → Phrase-by-phrase teacher**, learners can now rehearse a single unlocked phrase repeatedly before attempting microphone-verified scoring.
 
 - Adjustable **starting tempo from 35 to 120 BPM** with a quick 40 BPM beginner setting.

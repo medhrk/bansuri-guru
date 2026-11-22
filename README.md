@@ -1,3 +1,21 @@
+# v21 — Phrase Loop Trainer
+
+In **Song Notebook → Song Learning Studio → Study → Phrase-by-phrase teacher**, learners can now rehearse a single unlocked phrase repeatedly before attempting microphone-verified scoring.
+
+- Adjustable **starting tempo from 35 to 120 BPM** with a quick 40 BPM beginner setting.
+- Choose **2, 3, 4, 6, or 8 repetitions**.
+- Optional **increase by 5 BPM on each new repetition**, capped at 120 BPM.
+- Audible synthesized swaras use the current selected flute Sa. Rests (—) occupy a beat and remain silent.
+- **Start/Stop** and live cycle status provide control. Changing lessons, selecting a different phrase, navigating out of Song Notebook, or leaving the page stops playback.
+- Looped listening/practice **does not count as mastering a phrase** and **does not unlock** the next one; verified and manual completions remain separate.
+- No third-party recordings, licensed film melodies, raw microphone recordings, subscriptions or new Firebase permissions required. Existing saved songs, account and progress remain unchanged.
+
+**Source restore:** https://github.com/medhrk/bansuri-guru/tree/restore/pre-phrase-loop-v21-2026-11-23
+
+Limitations: this is a synthesized audio practice reference, not a real bansuri or tabla accompaniment. The app does not automatically judge a user's pitch while the loop is playing; use **Practise with teacher** for microphone feedback.
+
+---
+
 # v20 — Phrase-by-phrase Bollywood and Bhakti teaching
 
 **Song Notebook → Song Learning Studio → Study** now offers a stepwise **Phrase-by-phrase teacher**, in addition to the full-song lesson.

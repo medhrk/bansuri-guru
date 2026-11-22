@@ -38,11 +38,12 @@ function record(records,lesson,mode){
  d.noteAttempts=d.noteAttempts.slice(-400);
 }
 function render(){
- const element=document.getElementById("adaptiveBrief");
- if(!element)return;
+ const elements=[document.getElementById("adaptiveBrief"),document.getElementById("adaptiveDailyBrief")].filter(Boolean);
+ if(!elements.length)return;
  const {plan:p,stats,attempts,observed}=summary();
  const list=stats.filter(n=>n.confidence==="enough").sort((a,b)=>a.accuracy-b.accuracy).slice(0,4);
- element.innerHTML='<div class="adapt-head"><div><span class="adapt-eyebrow">YOUR PERSONAL RIYAZ</span><h2>Today’s focus</h2></div><span class="adapt-date">'+p.generatedFor+'</span></div><p>'+p.why+'</p><div class="adapt-tags">'+p.focus.map(n=>'<span>'+NOTE_NAMES[n]+'</span>').join("")+'</div><p><b>Exercise:</b> '+p.seq.length+' swaras at '+p.bpm+' BPM, with long notes and transitions.</p><p class="adapt-muted">Evidence: '+attempts+' measured note attempts across '+observed+' swaras. Skipped and microphone-off notes are excluded from weakness ratings.</p>'+(list.length?'<div class="adapt-results"><b>Recent pitch patterns</b>'+list.map(n=>'<div class="adapt-result"><span>'+NOTE_NAMES[n.note]+'</span><div class="adapt-bar"><i style="width:'+n.accuracy+'%"></i></div><strong>'+n.accuracy+'%</strong></div>').join("")+'</div>':'<p class="adapt-muted">Complete a few lessons with your mic enabled to make the exercises more personal.</p>')+'<button type="button" class="primary" data-adapt="launch">▶ Start my personal practice</button>';
+ const markup='<div class="adapt-head"><div><span class="adapt-eyebrow">YOUR PERSONAL RIYAZ</span><h2>Today’s focus</h2></div><span class="adapt-date">'+p.generatedFor+'</span></div><p>'+p.why+'</p><div class="adapt-tags">'+p.focus.map(n=>'<span>'+NOTE_NAMES[n]+'</span>').join("")+'</div><p><b>Exercise:</b> '+p.seq.length+' swaras at '+p.bpm+' BPM, with long notes and transitions.</p><p class="adapt-muted">Evidence: '+attempts+' measured note attempts across '+observed+' swaras. Skipped and microphone-off notes are excluded from weakness ratings.</p>'+(list.length?'<div class="adapt-results"><b>Recent pitch patterns</b>'+list.map(n=>'<div class="adapt-result"><span>'+NOTE_NAMES[n.note]+'</span><div class="adapt-bar"><i style="width:'+n.accuracy+'%"></i></div><strong>'+n.accuracy+'%</strong></div>').join("")+'</div>':'<p class="adapt-muted">Complete a few lessons with your mic enabled to make the exercises more personal.</p>')+'<button type="button" class="primary" data-adapt="launch">▶ Start my personal practice</button>';elements.forEach(element=>element.innerHTML=markup);
 }
+document.addEventListener("click",e=>{if(e.target.closest("#adaptiveDailyBrief [data-adapt=launch]")){tab("quest");window.surQuest?.startAdaptive?.()}});
 window.adaptiveTeacher={plan,summary,record,render};
 })();

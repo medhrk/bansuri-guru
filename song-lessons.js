@@ -28,10 +28,11 @@ function parse(text){
  const notes=tokens.filter(x=>x!=="|");
  if(!notes.length||!notes.some(x=>x!=="—"))return {error:"Please include at least one playable swara."};
  if(notes.length>96)return {error:"Keep a guided lesson to 96 notes or fewer. Split a long song into sections."};
- return {notes,display:tokens,phrases:phrase+1};
+ const groups=[];let group=[];for(const n of tokens){if(n==="|"){if(group.length)groups.push(group);group=[]}else group.push(n)}if(group.length)groups.push(group);
+ return {notes,display:tokens,phrases:groups.length,groups};
 }
 const $=id=>document.getElementById(id);
-let selected=null,filter="All";
+let selected=null,filter="All",phraseSession=null;
 function form(){
  const el=$("songLessonStudio");if(!el)return;
  el.innerHTML='<div class="song-studio-head"><div><span class="song-studio-kicker">LEARN • PRACTISE • PERFORM</span><h2>Song Learning Studio</h2></div><span class="pill">A-scale friendly</span></div><p>Turn your saved or community sargam into a guided, note-by-note flute lesson. Original practice melodies are available even before you save songs.</p><div class="song-studio-controls"><label>Explore<select id="songLessonFilter"><option>All</option><option>Bollywood</option><option>Bhakti</option><option>Other</option></select></label><label>Find a lesson<input id="songLessonFind" placeholder="Search titles, film, notes"></label></div><div id="songLessonList" class="song-lesson-list"></div><div id="songLessonDetail" class="song-lesson-detail" aria-live="polite"></div>';
@@ -72,8 +73,61 @@ function select(item){
  const actions=document.createElement("div");actions.className="row";
  const listen=document.createElement("button");listen.textContent="♫ Hear my notes";listen.onclick=()=>{try{const base=Number(s.sa)||440;parsed.notes.forEach((n,i)=>{if(n!=="—"&&semitones[n]!==undefined)tone(base*Math.pow(2,semitones[n]/12),i*.57,.39)})}catch(e){alert("Could not play: "+e.message)}};
  const begin=document.createElement("button");begin.className="primary";begin.textContent="🎯 Guided lesson";begin.onclick=()=>openLesson(item,parsed);
- actions.append(listen,begin);detail.append(actions);detail.scrollIntoView({block:"nearest",behavior:"smooth"});
+ actions.append(listen,begin);detail.append(actions);
+ const phraseArea=document.createElement("div");phraseArea.className="song-phrase-coach";phraseArea.id="songPhraseCoach";detail.append(phraseArea);
+ phraseSession={item,parsed,index:0};renderPhraseCoach();detail.scrollIntoView({block:"nearest",behavior:"smooth"});
 }
+
+function phraseKey(item){return "songphrases-"+String(item.key||"unknown")+"-"+String(item.notation||"").length+"-"+String(item.notation||"").slice(0,48)}
+function progressStore(){s.songPhraseProgress=s.songPhraseProgress&&typeof s.songPhraseProgress==="object"?s.songPhraseProgress:{};return s.songPhraseProgress}
+function unlocked(item){const x=progressStore()[phraseKey(item)];return Math.max(0,Math.min(95,Number(x?.unlocked)||0))}
+function saveUnlock(item,number){const p=progressStore(),key=phraseKey(item);const next=Math.max(unlocked(item),number);p[key]={unlocked:next,updated:new Date().toISOString()};const keys=Object.keys(p).sort((a,b)=>String(p[a].updated||"").localeCompare(String(p[b].updated||"")));while(keys.length>100)delete p[keys.shift()];saveStore()}
+function renderPhraseCoach(){
+ const outer=$("songPhraseCoach");if(!outer||!phraseSession)return;
+ outer.replaceChildren();const {item,parsed}=phraseSession;const total=parsed.groups.length;
+ const heading=document.createElement("h3");heading.textContent="🎼 Phrase-by-phrase teacher";outer.append(heading);
+ const expl=document.createElement("p");expl.className="muted";expl.textContent="Listen to one phrase, repeat the swaras, then complete it in microphone-guided Learn mode. Completing a phrase unlocks the next. Manual practice can be marked separately without an accuracy grade.";outer.append(expl);
+ const selector=document.createElement("div");selector.className="song-phrase-select";
+ for(let i=0;i<total;i++){const b=document.createElement("button"),locked=i>unlocked(item);b.textContent=(i<unlocked(item)?"✓ ":i===unlocked(item)?"▶ ":"🔒 ")+"Phrase "+(i+1);b.disabled=locked;b.className=i===phraseSession.index?"selected":"";b.onclick=()=>{phraseSession.index=i;renderPhraseCoach()};selector.append(b)}outer.append(selector);
+ const index=phraseSession.index;if(index>unlocked(item))phraseSession.index=unlocked(item);
+ const seq=parsed.groups[phraseSession.index];const label=document.createElement("p");label.textContent="Phrase "+(phraseSession.index+1)+" of "+total+" · "+seq.length+" beats";outer.append(label);
+ const chips=document.createElement("div");chips.className="song-lesson-phrase";for(const n of seq){const span=document.createElement("span");span.textContent=n;span.title=name[n]||n;chips.append(span)}outer.append(chips);
+ const note=document.createElement("p");note.className="muted";note.textContent="Teacher sequence: ① Hear ② Sing ③ Play ④ Check pitch stability. Rests (—) are silent beats.";outer.append(note);
+ const row=document.createElement("div");row.className="row";
+ const listen=document.createElement("button");listen.textContent="♫ Listen to phrase";listen.onclick=()=>{try{const base=Number(s.sa)||440;seq.forEach((n,i)=>{if(n!=="—"&&semitones[n]!==undefined)tone(base*Math.pow(2,semitones[n]/12),i*.65,.4)})}catch(e){alert(e.message)}};
+ const start=document.createElement("button");start.textContent="🎙 Practise with teacher";start.className="primary";start.onclick=()=>{
+  const mission={id:"phrase-"+String(item.key||"song").slice(0,40)+"-"+phraseSession.index,name:String(item.title).slice(0,75)+" · Phrase "+(phraseSession.index+1),kind:"Song phrase",bpm:48,seq:seq.slice(),help:"Listen, sing, then play each swara. Two seconds of steady pitch per note. Phrase progress is earned only with measured completion."};
+  if(!window.surQuest?.openExercise?.(mission))return;
+  tab("quest");
+ };
+ const manual=document.createElement("button");manual.textContent="✓ Mark manually practised";manual.onclick=()=>{if(!confirm("Mark this phrase practised without microphone verification? This only unlocks the next phrase; no pitch accuracy is awarded."))return;completePhrase(false)};
+ row.append(listen,start,manual);outer.append(row);
+ const msg=document.createElement("p");msg.className="muted";msg.id="phraseCoachStatus";msg.textContent="Unlocked "+Math.min(total,unlocked(item)+1)+" of "+total+" phrases. Mastery needs microphone-verified practice.";outer.append(msg);
+}
+function completePhrase(verified){
+ if(!phraseSession)return;
+ const item=phraseSession.item,number=phraseSession.index+1;
+ saveUnlock(item,number);
+ const total=phraseSession.parsed.groups.length;
+ if(number<total)phraseSession.index=number;
+ renderPhraseCoach();
+ const label=$("phraseCoachStatus");
+ if(label)label.textContent=verified?"✓ Phrase verified with steady pitch! The next phrase is unlocked.":"Phrase marked as manually practised (not pitch-verified).";
+}
+function handleQuestFinish(report){
+ if(!phraseSession||!report?.lesson?.id?.startsWith("phrase-"))return;
+ const expected="phrase-"+String(phraseSession.item.key||"song").slice(0,40)+"-"+phraseSession.index;
+ if(report.lesson.id!==expected)return;
+ const evidence=report.lesson.seq.map((n,i)=>({note:n,skipped:report.skippedIndices.includes(i),steady:!!report.evidence[i]?.steady}));
+ const sounded=evidence.filter(x=>x.note!=="—");
+ const good=!!report.microphone&&sounded.length>0&&sounded.every(x=>x.steady&&!x.skipped);
+ if(good){completePhrase(true)}else{
+  const label=$("phraseCoachStatus");
+  if(label)label.textContent="Phrase attempt finished, but some notes were skipped or not held steadily. Replay and try again to unlock.";
+ }
+}
+window.addEventListener("bansuri-quest-finished",e=>handleQuestFinish(e.detail));
+
 function openLesson(item,parsed){
  if(!window.surQuest?.openExercise){alert("Sur Quest is unavailable. Reload Bansuri Guru and try again.");return}
  const prior=document.querySelector("#quest:not(.hidden)");

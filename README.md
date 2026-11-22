@@ -1,3 +1,28 @@
+# Bansuri Guru — Guided Riyaz v4
+
+## New guided session (2026-11-22)
+
+The **Daily Practice → Start guided session** control now runs a real 5-stage lesson:
+1. Breath and long Sa.
+2. Sargam and finger warm-up.
+3. Raag Bhupali.
+4. Original film-style melody.
+5. Dadra cool-down and reflection.
+
+Select **15, 30, 45 or 60 minutes** and save; the app allocates every minute across all five stages with an accurate whole-session countdown. At each stage it displays swaras, approximate target frequencies from your configured Sa, a moving note highlight, the active beat in the taal cycle, tempo, time remaining in the stage, and teacher instructions. The routine advances automatically. Users may pause, resume, skip or go back.
+
+Metronome ticks are enabled by default. Reference-note playback is **opt-in** to avoid covering live flute sound. Microphone permission is optional; pitch feedback estimates cents deviation, and the app only displays an approximate in-tune sampling percentage when microphone evidence exists. This is **not** transcription-quality or a graded Padhanisa equivalent yet. Practice history persists locally and in cloud backups if cloud sync has been enabled.
+
+**Do not press Log Session until the session starts.** Logging records actual elapsed practice minutes (not the selected goal), whether it finished, optional sampled pitch accuracy and your reflection.
+
+## Recovery
+
+- Previous academy checkpoint: https://github.com/medhrk/bansuri-guru/tree/restore/pre-guided-practice-2026-11-22
+- Working Google-login checkpoint: https://github.com/medhrk/bansuri-guru/tree/restore/phase2-google-cloud-working-2026-11-22
+- Export local practice data under Google & Backup before a database migration. Git branches do not back up Firestore records.
+
+---
+
 # Bansuri Guru — Academy release
 
 Public site: https://bansuri-guru.medhrk.workers.dev/

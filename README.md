@@ -1,3 +1,25 @@
+# v13 — Adaptive Riyaz Teacher
+
+**New:** "Today's focus" at the top of **Daily Practice** and **Sur Quest**. Tap "Start my personal practice" to open a generated **My Personal Riyaz** mission with swaras chosen based on your pitch history.
+
+## How it works
+- Every completed Sur Quest session with microphone observations records a capped, per-note summary: note, observed frames, in-tune frames, average absolute pitch deviation, skipped flag, and date.
+- Notes with fewer than three observations per occurrence are treated as **insufficient evidence**. Skipped / unmeasured notes are excluded from weakness rankings. Notes need at least two observed occurrences and ten total valid observations before being flagged as reliably difficult.
+- Notes below 75% observed in-tune readings are selected as focus notes. The adaptive lesson begins with Sa warmup, then repeats the chosen notes and transitions, finishing with a cool-down.
+- With insufficient history or no detectable weak areas, the app uses a balanced **Sa–Re–Ga** starter session without claiming personalized insights.
+- **Every day**, opening the app regenerates its recommended focus from the most recent capped evidence. The mission can be repeated and is never locked behind a subscription. All sound and progress computations are browser-side.
+- The personalized mission uses the existing Sur Quest **Learn mode**, where each note needs two seconds of steady pitch within ±35 cents to advance.
+- The recommendation isn't professional-grade assessment; octave ambiguity and microphone errors may affect it. It measures pitch consistency, not tone beauty, breath control or classical raag mastery.
+
+## Storage, backup, safety
+- Local practice data now includes `quest.noteAttempts`, capped at 400 entries, and the optional existing private Firestore practice backup includes it.
+- No new Firebase rules, paid AI API, or microphone upload is needed. Only summarized pitch observations are saved, not raw audio.
+- Google sign-in, existing timed guided practice, raag/bhakti library, lesson history and user Sa settings remain available.
+- Source rollback: https://github.com/medhrk/bansuri-guru/tree/restore/pre-adaptive-teacher-v13-2026-11-22
+- Code restores do not roll back existing Firestore records; export practice JSON before migrating.
+
+---
+
 # v12 — Continuous note stability training
 
 **Added:** a visible **Steady note challenge** under the frequency bar in Daily Practice → Guided Riyaz and Sur Quest.

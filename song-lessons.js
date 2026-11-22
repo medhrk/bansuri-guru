@@ -220,6 +220,6 @@ function openCommunity(item){
 }
 function refresh(){draw()}
 window.addEventListener("pagehide",()=>stopPhraseLoop(false));
-window.bansuriSongStudio={parse,refresh,openCommunity};
+window.bansuriSongStudio={parse,refresh,openCommunity,stopLoop:()=>stopPhraseLoop(false)};
 form();
 })();

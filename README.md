@@ -1,3 +1,27 @@
+# v15 — Preserve Song Notebook + expand Sargam & Raag
+
+The existing **My Bollywood song notebook** is preserved rather than replaced. It still stores the user's title, film/artist, custom sargam notation and original playback/delete actions. Existing `s.songs` records remain backward compatible. Enhancements:
+- **Add any song**: completely freeform title, film/artist and user-written notation, including devotional, folk, Bollywood or original music. No fixed catalog or subscription required.
+- **Edit** a previously saved song and its notes without losing the entry; cancel editing safely.
+- **Search** by title, artist or notation.
+- **Save in my notebook** from the existing Bollywood discovery recommendations; existing Bhakti discovery also prefills the notebook. New discovery actions exit any prior edit to avoid overwriting older notes.
+- Remove the previous silent 200-song truncation on Firestore backup. Local storage remains available; very large backups can still trigger the existing 750 KB Firestore payload limit. Users should export their JSON data periodically.
+
+The **original eight Sargam & Raag exercises** are unchanged and visible. An additional searchable and filtered library now provides:
+- **24 new original sargam/alankara drills** across beginner/intermediate/expert.
+- **20 raag introductory frameworks**, each with separate aroha, avaroha and phrase exercises (60 lessons).
+- Thus **84 additional exercises**, making **92 in total** on the Sargam & Raag page.
+- A reference tone preview uses the selected bansuri Sa, including **komal r/g/d/n and tivra M^**. The Sur Quest interactive practice accepts these pitch tokens. The generic fingering diagram explicitly warns that alternate/altered-note fingerings are not exact.
+- User can search titles or note sequences, filter by level and lesson type, and launch exercises into Sur Quest for live pitch practice.
+
+Raag teaching phrases are simplified educational examples, **not complete raga grammar**; gharana-specific pakad, ornamentation, chalan, and ascending/descending details need independent study with a qualified teacher. No copyrighted lyrics or full song transcriptions are included.
+
+**Preserved recovery source:** https://github.com/medhrk/bansuri-guru/tree/restore/pre-notebook-raag-expansion-v15-2026-11-22
+
+This upgrade was source-reviewed and syntax-tested with generated lesson token validation. Real microphone grading and Cloudflare live deployment have not yet been verified.
+
+---
+
 # v14 — Levelled Alankara and Ma–Pa Transition Academy
 
 ## Curriculum changes

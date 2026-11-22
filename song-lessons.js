@@ -2,6 +2,8 @@
 (function(){
 "use strict";
 const supported=new Set(["S","r","R","g","G","M","M^","P","d","D","n","N","S'","—"]);
+const semitones={S:0,r:1,R:2,g:3,G:4,M:5,"M^":6,P:7,d:8,D:9,n:10,N:11,"S'":12};
+const aliases={Sa:"S",Re:"R",Ga:"G",Ma:"M",Pa:"P",Dha:"D",Ni:"N",SA:"S",RE:"R",GA:"G",MA:"M",PA:"P",DHA:"D",NI:"N"};
 const name={S:"Sa",r:"Komal Re",R:"Re",g:"Komal Ga",G:"Ga",M:"Ma","M^":"Tivra Ma",P:"Pa",d:"Komal Dha",D:"Dha",n:"Komal Ni",N:"Ni","S'":"Upper Sa","—":"Rest"};
 const exercises=[
  {id:"original-krishna",title:"Krishna Morning — Original Practice",kind:"Bhakti",film:"Original devotional-style exercise",notation:"S R G P | G R S — | R G P D | P G R S",description:"Begin with soft Sa, then practise a gentle rise and fall in four phrases."},
@@ -15,7 +17,8 @@ function parse(text){
  // Deliberately reject words/lyrics and accidentals the teaching engine cannot evaluate.
  const parts=raw.replace(/[|,;]+/g," | ").replace(/[\r\n]+/g," | ").split(/\s+/).filter(Boolean);
  const tokens=[];let phrase=0;
- for(const token of parts){
+ for(const rawToken of parts){
+   const token=aliases[rawToken]||rawToken;
    if(token==="|"){if(tokens.length&&tokens[tokens.length-1]!=="|"){tokens.push("|");phrase++}continue}
    if(/^[—–-]+$/.test(token)){tokens.push("—");continue}
    if(!supported.has(token))return {error:'Unsupported symbol "'+token.slice(0,30)+'". Use space-separated S R G M M^ P D N S'+"'"+' (also r g d n for komal notes), — for rests, and | between phrases. Lyrics cannot be assessed as sargam.'};
@@ -67,7 +70,7 @@ function select(item){
  const help=document.createElement("p");help.className="muted";help.textContent="Teaching steps: ① Listen to the phrase ② Say the swaras aloud ③ Play them slowly ④ Start microphone-checked Learn mode. Bars (│) separate phrases; rests count as beats.";
  detail.append(help);
  const actions=document.createElement("div");actions.className="row";
- const listen=document.createElement("button");listen.textContent="♫ Hear my notes";listen.onclick=()=>{try{playline(parsed.notes.join(" "))}catch(e){alert("Could not play: "+e.message)}};
+ const listen=document.createElement("button");listen.textContent="♫ Hear my notes";listen.onclick=()=>{try{const base=Number(s.sa)||440;parsed.notes.forEach((n,i)=>{if(n!=="—"&&semitones[n]!==undefined)tone(base*Math.pow(2,semitones[n]/12),i*.57,.39)})}catch(e){alert("Could not play: "+e.message)}};
  const begin=document.createElement("button");begin.className="primary";begin.textContent="🎯 Guided lesson";begin.onclick=()=>openLesson(item,parsed);
  actions.append(listen,begin);detail.append(actions);detail.scrollIntoView({block:"nearest",behavior:"smooth"});
 }

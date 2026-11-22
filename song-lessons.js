@@ -166,6 +166,7 @@ function renderPhraseCoach(){
  const row=document.createElement("div");row.className="row";
  const listen=document.createElement("button");listen.textContent="♫ Listen to phrase";listen.onclick=()=>{try{const base=Number(s.sa)||440;seq.forEach((n,i)=>{if(n!=="—"&&semitones[n]!==undefined)tone(base*Math.pow(2,semitones[n]/12),i*.65,.4)})}catch(e){alert(e.message)}};
  const start=document.createElement("button");start.textContent="🎙 Practise with teacher";start.className="primary";start.onclick=()=>{
+  stopPhraseLoop(false);
   const mission={id:"phrase-"+String(item.key||"song").slice(0,40)+"-"+phraseSession.index,name:String(item.title).slice(0,75)+" · Phrase "+(phraseSession.index+1),kind:"Song phrase",bpm:48,seq:seq.slice(),help:"Listen, sing, then play each swara. Two seconds of steady pitch per note. Phrase progress is earned only with measured completion."};
   if(!window.surQuest?.openExercise?.(mission))return;
   tab("quest");
@@ -220,6 +221,8 @@ function openCommunity(item){
 }
 function refresh(){draw()}
 window.addEventListener("pagehide",()=>stopPhraseLoop(false));
+window.addEventListener("visibilitychange",()=>{if(document.hidden)stopPhraseLoop(false)});
+document.querySelectorAll('#nav [data-tab]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab!=="songs")stopPhraseLoop(false)}));
 window.bansuriSongStudio={parse,refresh,openCommunity,stopLoop:()=>stopPhraseLoop(false)};
 form();
 })();

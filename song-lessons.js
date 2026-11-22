@@ -82,14 +82,14 @@ function select(item){
 function phraseKey(item){return "songphrases-"+String(item.key||"unknown")+"-"+String(item.notation||"").length+"-"+String(item.notation||"").slice(0,48)}
 function progressStore(){s.songPhraseProgress=s.songPhraseProgress&&typeof s.songPhraseProgress==="object"?s.songPhraseProgress:{};return s.songPhraseProgress}
 function unlocked(item){const x=progressStore()[phraseKey(item)];return Math.max(0,Math.min(95,Number(x?.unlocked)||0))}
-function saveUnlock(item,number){const p=progressStore(),key=phraseKey(item);const next=Math.max(unlocked(item),number);p[key]={unlocked:next,updated:new Date().toISOString()};const keys=Object.keys(p).sort((a,b)=>String(p[a].updated||"").localeCompare(String(p[b].updated||"")));while(keys.length>100)delete p[keys.shift()];saveStore()}
+function saveUnlock(item,number,verified=false,score=null){const p=progressStore(),key=phraseKey(item),previous=p[key]||{};const next=Math.max(unlocked(item),number),verifiedPhrases={...(previous.verifiedPhrases||{})};if(verified)verifiedPhrases[number]=Math.max(0,Math.min(100,Math.round(Number(score)||0)));p[key]={unlocked:next,verifiedPhrases,updated:new Date().toISOString()};const keys=Object.keys(p).sort((a,b)=>String(p[a].updated||"").localeCompare(String(p[b].updated||"")));while(keys.length>100)delete p[keys.shift()];saveStore()}
 function renderPhraseCoach(){
  const outer=$("songPhraseCoach");if(!outer||!phraseSession)return;
  outer.replaceChildren();const {item,parsed}=phraseSession;const total=parsed.groups.length;
  const heading=document.createElement("h3");heading.textContent="🎼 Phrase-by-phrase teacher";outer.append(heading);
  const expl=document.createElement("p");expl.className="muted";expl.textContent="Listen to one phrase, repeat the swaras, then complete it in microphone-guided Learn mode. Completing a phrase unlocks the next. Manual practice can be marked separately without an accuracy grade.";outer.append(expl);
  const selector=document.createElement("div");selector.className="song-phrase-select";
- for(let i=0;i<total;i++){const b=document.createElement("button"),locked=i>unlocked(item);b.textContent=(i<unlocked(item)?"✓ ":i===unlocked(item)?"▶ ":"🔒 ")+"Phrase "+(i+1);b.disabled=locked;b.className=i===phraseSession.index?"selected":"";b.onclick=()=>{phraseSession.index=i;renderPhraseCoach()};selector.append(b)}outer.append(selector);
+ for(let i=0;i<total;i++){const b=document.createElement("button"),locked=i>unlocked(item);const verified=progressStore()[phraseKey(item)]?.verifiedPhrases||{};b.textContent=(verified[i+1]!==undefined?"✓ ":i<unlocked(item)?"○ ":i===unlocked(item)?"▶ ":"🔒 ")+"Phrase "+(i+1)+(verified[i+1]!==undefined?" · "+verified[i+1]+"%":"");b.disabled=locked;b.className=i===phraseSession.index?"selected":"";b.onclick=()=>{phraseSession.index=i;renderPhraseCoach()};selector.append(b)}outer.append(selector);
  const index=phraseSession.index;if(index>unlocked(item))phraseSession.index=unlocked(item);
  const seq=parsed.groups[phraseSession.index];const label=document.createElement("p");label.textContent="Phrase "+(phraseSession.index+1)+" of "+total+" · "+seq.length+" beats";outer.append(label);
  const chips=document.createElement("div");chips.className="song-lesson-phrase";for(const n of seq){const span=document.createElement("span");span.textContent=n;span.title=name[n]||n;chips.append(span)}outer.append(chips);
@@ -105,24 +105,24 @@ function renderPhraseCoach(){
  row.append(listen,start,manual);outer.append(row);
  const msg=document.createElement("p");msg.className="muted";msg.id="phraseCoachStatus";msg.textContent="Unlocked "+Math.min(total,unlocked(item)+1)+" of "+total+" phrases. Mastery needs microphone-verified practice.";outer.append(msg);
 }
-function completePhrase(verified){
+function completePhrase(verified,score=null){
  if(!phraseSession)return;
  const item=phraseSession.item,number=phraseSession.index+1;
- saveUnlock(item,number);
+ saveUnlock(item,number,verified,score);
  const total=phraseSession.parsed.groups.length;
  if(number<total)phraseSession.index=number;
  renderPhraseCoach();
  const label=$("phraseCoachStatus");
- if(label)label.textContent=verified?"✓ Phrase verified with steady pitch! The next phrase is unlocked.":"Phrase marked as manually practised (not pitch-verified).";
+ if(label)label.textContent=verified?"✓ Phrase verified! Pitch accuracy: "+Math.round(score)+"%. Next phrase unlocked.":"Phrase marked as manually practised (not pitch-verified).";
 }
 function handleQuestFinish(report){
  if(!phraseSession||!report?.lesson?.id?.startsWith("phrase-"))return;
  const expected="phrase-"+String(phraseSession.item.key||"song").slice(0,40)+"-"+phraseSession.index;
  if(report.lesson.id!==expected)return;
- const evidence=report.lesson.seq.map((n,i)=>({note:n,skipped:report.skippedIndices.includes(i),steady:!!report.evidence[i]?.steady}));
+ const evidence=report.lesson.seq.map((n,i)=>({note:n,skipped:report.skippedIndices.includes(i),steady:!!report.evidence[i]?.steady,samples:report.evidence[i]?.samples||0,inTune:report.evidence[i]?.inTune||0}));
  const sounded=evidence.filter(x=>x.note!=="—");
  const good=!!report.microphone&&sounded.length>0&&sounded.every(x=>x.steady&&!x.skipped);
- if(good){completePhrase(true)}else{
+ if(good){const total=sounded.reduce((n,x)=>n+x.samples,0);const percent=total?100*sounded.reduce((n,x)=>n+x.inTune,0)/total:100;completePhrase(true,percent)}else{
   const label=$("phraseCoachStatus");
   if(label)label.textContent="Phrase attempt finished, but some notes were skipped or not held steadily. Replay and try again to unlock.";
  }
@@ -132,7 +132,7 @@ window.addEventListener("bansuri-quest-finished",e=>handleQuestFinish(e.detail))
 function openLesson(item,parsed){
  if(!window.surQuest?.openExercise){alert("Sur Quest is unavailable. Reload Bansuri Guru and try again.");return}
  const prior=document.querySelector("#quest:not(.hidden)");
- window.surQuest.openExercise({id:"song-"+String(item.key||"community").slice(0,75),name:String(item.title).slice(0,100),kind:(item.kind||"Song")+" notation",bpm:52,seq:parsed.notes.slice(),help:"Play the notes you selected from "+item.source+". Hold each pitch steadily; rest where marked. This is user-supplied notation, not a verified official score."});
+ if(!window.surQuest.openExercise({id:"song-"+String(item.key||"community").slice(0,75),name:String(item.title).slice(0,100),kind:(item.kind||"Song")+" notation",bpm:52,seq:parsed.notes.slice(),help:"Play the notes you selected from "+item.source+". Hold each pitch steadily; rest where marked. This is user-supplied notation, not a verified official score."}))return;
  tab("quest");
  if(prior)window.scrollTo({top:0,behavior:"smooth"});
 }

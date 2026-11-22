@@ -1,13 +1,31 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js';
 import {getAuth, GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js';
-import {getFirestore,doc,getDoc,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
-let app=null,auth=null,db=null,user=null,hasUploaded=false,auto=false,writeTimer=null;const state={get ready(){return !!auth},get user(){return user},get hasUploaded(){return hasUploaded},configure,login,logout,upload,download,queueSave,setAuto,disableAuto};window.cloudRiyaz=state;window.dispatchEvent(new Event('bansuri-cloud-ready'));
+import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,query,where,limit,getDocs,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
+let app=null,auth=null,db=null,user=null,hasUploaded=false,auto=false,writeTimer=null;const state={get ready(){return !!auth},get user(){return user},get hasUploaded(){return hasUploaded},configure,login,logout,upload,download,queueSave,setAuto,disableAuto,publishPublicSong,unpublishPublicSong,listPublicSongs};window.cloudRiyaz=state;window.dispatchEvent(new Event('bansuri-cloud-ready'));
 function userDoc(){if(!user||!db)throw Error('Sign in first');return doc(db,'users',user.uid,'practice','current')}
 async function configure(c){if(auth){if(app.options.projectId!==c.projectId)throw Error('A different Firebase project is already active. Refresh to change projects.');return}if(!c||!c.apiKey||!c.authDomain||!c.projectId||!c.appId)throw Error('Missing Firebase web configuration');app=initializeApp({apiKey:c.apiKey,authDomain:c.authDomain,projectId:c.projectId,appId:c.appId});auth=getAuth(app);db=getFirestore(app);onAuthStateChanged(auth,u=>{user=u;if(!u){hasUploaded=false;auto=false;document.getElementById('autoCloud').checked=false}document.getElementById('cloudStatus').textContent=u?'Signed in as '+(u.email||u.uid)+'. Choose upload or restore.':'Firebase ready. Sign in with Google.'})}
 async function login(){if(!auth)throw Error('Configure Firebase first');await signInWithPopup(auth,new GoogleAuthProvider())}
 async function logout(){if(!auth)return;disableAuto();await signOut(auth)}
 async function upload(data){if(!user)throw Error('Sign in first');const safe={time:String(data.time||'20:30'),goal:Number(data.goal)||30,sa:(Math.abs(Number(data.sa)-436)<0.01?440:Number(data.sa))||440,logs:data.logs,songs:data.songs,academy:data.academy||{completed:[],bookmarks:[]},learnerLevel:['beginner','intermediate','expert'].includes(data.learnerLevel)?data.learnerLevel:'beginner',quest:{...(data.quest||{history:[],best:{},calibrated:false}),noteAttempts:(Array.isArray(data.quest?.noteAttempts)?data.quest.noteAttempts:[]).slice(-400)}};if(JSON.stringify(safe).length>750000)throw Error('Backup too large. Export local backup and reduce stored records.');await setDoc(userDoc(),{...safe,updatedAt:serverTimestamp()});hasUploaded=true}
 async function download(){const snap=await getDoc(userDoc());if(!snap.exists())return null;hasUploaded=true;const data=snap.data();return {time:data.time,goal:data.goal,sa:(Math.abs(Number(data.sa)-436)<0.01?440:Number(data.sa)),logs:data.logs,songs:data.songs,academy:data.academy||{completed:[],bookmarks:[]},learnerLevel:['beginner','intermediate','expert'].includes(data.learnerLevel)?data.learnerLevel:'beginner',quest:{...(data.quest||{history:[],best:{},calibrated:false}),noteAttempts:(Array.isArray(data.quest?.noteAttempts)?data.quest.noteAttempts:[]).slice(-400)}}}
+
+function sanitizeSong(raw){const title=String(raw?.title||'').trim().slice(0,200),film=String(raw?.film||'').trim().slice(0,200),notation=String(raw?.notation||'').trim().slice(0,3000);if(!title||!notation.trim())throw Error('Enter a title and your own sargam notation before sharing.');return {title,film,notation}}
+function publicDoc(id){if(!db)throw Error('Connect Firebase in Google & Backup first.');if(!/^[a-zA-Z0-9_-]{12,80}$/.test(id||''))throw Error('Invalid publication ID.');return doc(db,'publicSongs',id)}
+async function publishPublicSong(song,id){
+ if(!user)throw Error('Sign in with Google before publishing.');
+ const entry=sanitizeSong(song),date=new Date().toISOString(),ref=publicDoc(id);
+ const previous=await getDoc(ref);
+ if(previous.exists()&&previous.data().ownerUid!==user.uid)throw Error('This publication belongs to another user.');
+ const data={...entry,ownerUid:user.uid,isPublic:true,publishedAt:previous.exists()?previous.data().publishedAt:date,updatedAt:date};
+ await setDoc(ref,data);
+ return id;
+}
+async function unpublishPublicSong(id){if(!user)throw Error('Sign in with Google to unpublish.');await deleteDoc(publicDoc(id))}
+async function listPublicSongs(){
+ if(!db)throw Error('Connect Firebase to browse community songs.');
+ const snap=await getDocs(query(collection(db,'publicSongs'),where('isPublic','==',true),limit(80)));
+ return snap.docs.map(d=>({id:d.id,title:String(d.data().title||'').slice(0,200),film:String(d.data().film||'').slice(0,200),notation:String(d.data().notation||'').slice(0,3000),ownerUid:d.data().ownerUid,updatedAt:d.data().updatedAt})).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+}
 function setAuto(v){auto=!!v}
 function disableAuto(){auto=false;clearTimeout(writeTimer)}
 function queueSave(data){if(!auto||!user||!hasUploaded)return;clearTimeout(writeTimer);writeTimer=setTimeout(async()=>{try{await upload(data);document.getElementById('cloudStatus').textContent='Cloud saved · '+new Date().toLocaleTimeString()}catch(e){disableAuto();document.getElementById('autoCloud').checked=false;document.getElementById('cloudStatus').textContent='Cloud save failed: '+e.message}},1700)}

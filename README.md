@@ -1,22 +1,34 @@
-# Bansuri Guru — Phase 2 (Google Login + Cloud Backup)
+# Bansuri Guru — Academy release
 
-An original, lightweight daily bansuri practice web app. **Phase 2 source code now includes Google sign-in and optional private Firestore backups.** See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for required Firebase project setup and security rules. The earlier Google Calendar OAuth JSON is *not* the Firebase web app configuration.
+Public site: https://bansuri-guru.medhrk.workers.dev/
 
-An original, lightweight daily bansuri practice web app. Works without a server backend. Includes local practice planner, timer, logs, sargam audio reference, microphone pitch estimation, taal metronome, song notebook, curated resource links, offline .ics calendar export and OAuth-based Google Calendar event creation (once configured).
+## Learning academy (current release)
 
-## Free hosting
-Publish this repository using **Cloudflare Pages**: Workers & Pages → Create → Pages → Connect to Git → select this repository. No build step; use the repository root as output directory. The repository can stay on GitHub while the website is served from Cloudflare.
+- Beginner welcome and onboarding, seven-day challenge, four-week pathway.
+- 12 original guided bansuri lessons with steps, goals and basic note references.
+- 30 Bollywood/devotional/patriotic song-discovery cards with *external search links* to free notation sites and YouTube tutorials (results are not guaranteed).
+- 11 curated free-to-view educational resources, including verified direct beginner YouTube videos.
+- Lesson completion progress and song bookmarks in browser storage and optional Firestore cloud backups.
+- Existing practice planner, Calendar OAuth, pitch reference, metronome, song notebook, Google Auth and backup/restore retained.
 
-## Google Calendar
-Create a Google Cloud OAuth Web Application client ID, configure OAuth consent, add your hosted HTTPS origin to Authorized JavaScript origins, enable Google Calendar API, then enter the **public** Client ID under Google & Backup. Never insert client secrets into browser code. Calendar event creation requests the Calendar events scope explicitly. Repeated syncs create duplicate events.
+## Recovery / restore points
 
-## Current limits
-This is an MVP. Google sign-in and cloud backup require explicit Firebase project configuration, and have not been validated against your live Firebase project yet. History is saved in localStorage. Microphone requires a secure browser origin and user permission. Reference audio is synthetic. Bollywood scores are **not** bundled, to respect copyright. No payments or paid services are active.
+**Pre-academy checkpoint:** [restore/phase2-google-cloud-working-2026-11-22](https://github.com/medhrk/bansuri-guru/tree/restore/phase2-google-cloud-working-2026-11-22).
 
-## Roadmap
-- Phase 2: Firebase Google sign-in, secure multi-user database rules, cloud practice sync and note accuracy feedback.
-- Phase 3: rights-cleared content, teacher portal, SEO lesson pages, user testing and Android packaging.
-- Phase 4: premium subscriptions and instructor marketplace after privacy, billing, consumer support and content licenses are ready.
+To roll back, visit GitHub → branch menu → choose restore branch to inspect, then revert academy commits or create a PR copying the checkpoint into main. **Back up Firestore and export your website's local JSON** before any database migrations; a Git branch preserves source code, not remote data. Never delete a working Firebase project during rollback.
 
-## License
-No license granted to third parties yet. External resource links belong to their owners. Original educational exercises are part of this project.
+## Setup
+
+See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for Firebase Google sign-in and strict Firestore access rules. Google Calendar uses an independent OAuth Client ID in the app. Do not commit secret keys or OAuth client-secret JSON.
+
+## Hosting
+
+This is a static web app. Cloudflare's GitHub integration can automatically deploy updates from the main branch. There is no npm build command; serve the repository root. The live deployment must be verified separately in Cloudflare.
+
+## Educational / licensing notes
+
+The lesson curriculum and practice exercises in this app are original. Links to third-party songs, tutorials and notations open their sites or search pages. Free-to-view content does not automatically grant copying, embedding, republication, or commercial licensing rights. No third-party copyrighted song transcriptions are bundled. For paid lessons, obtain appropriate rights or create/commission original material.
+
+## Limits and next work
+
+Audio tuner is a pitch estimate, not a graded full-performance teacher. Firestore synchronization is simple backup/restore, not conflict-free multi-device collaboration. Future: calibrated note-by-note assessments, fingering illustrations, skill-based personalized paths, performance recording and feedback, public SEO pages and optional premium accounts.

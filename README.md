@@ -1,3 +1,32 @@
+# Interactive Sur Quest — Concept v2 / Release v6
+
+Bansuri Guru now includes **Sur Quest** (navigation tab). This is the second-generation interactive teaching experience, layered on top of earlier Academy v5.
+
+## How to use
+1. Open **Sur Quest**, choose one of five original lessons: First Clear Sa, Sa Re Ga, Bhupali Journey, Keharwa Quest, or Devotional Melody.
+2. Select a mode: **Learn** (next note only when pitch is near target for three samples, or when manually skipping), **Practice** (notes progress one per beat), or **Perform** (continuous timing with a simple summary).
+3. Set your flute's Sa. Check the simplified six-hole fingering diagram and use **Hear note** as needed.
+4. Optionally authorize microphone access over HTTPS. The tuner is approximate and can be confused by noise or upper partials; use headphones for reference tones if possible.
+5. Repeat lessons until pitch stability improves. A "mastered" marker needs at least 70% of all expected sounding notes with a near-target mic reading. Never claim a grade when no microphone evidence exists.
+
+## Cloud data and recovery
+- Firebase Google authentication, Calendar and existing practice logs remain intact.
+- The optional Firestore backup document now includes a `quest` object with up to 100 attempts and best percentages. Existing documents missing this field continue to load with defaults.
+- **Pre-upgrade recovery:** [restore/pre-sur-quest-2026-11-22](https://github.com/medhrk/bansuri-guru/tree/restore/pre-sur-quest-2026-11-22).
+- Git restores *code*, not Firestore data. **Export backup** in Google & Backup before a significant migration, then verify your saved document under Firestore.
+- Cloud sync still uses explicit upload/restore, with optional auto-save following the first upload. It does not merge simultaneous edits across devices.
+
+## Known limitations
+- Pitch estimates are not performance-grade or instrument-specific clinical assessments. The browser uses microphone-based autocorrelation with a ±35 cent tolerance. Breath noise, low notes and octave confusion may affect results.
+- Fingering diagrams are simplified examples for shuddha swaras and may differ across bansuri schools, instruments and octave technique.
+- Learn mode has no time pressure. Practice/Perform advance by BPM, and the metronome is a synthesized click rather than tabla audio.
+- Scores reflect swaras that were near-target during observation; comprehensive rhythm attack precision and sustained-note quality grading remain future work.
+
+## Installation
+This is a no-build static website. GitHub main is deployed through Cloudflare; the live Cloudflare deployment requires separate verification. Refresh (Cmd+Shift+R on Mac) if an older service-worker cache appears.
+
+---
+
 # Bansuri Guru v5 — More raags, taals, bhakti and note checking
 
 **Added:** an integrated Raag • Taal • Bhakti teaching area with 10 introductory raags, 7 counted taals, 30 devotional-song discovery cards and 16 film-song learning associations. These are curated teaching suggestions rather than complete licensed scores or definitive film-to-raag classifications.

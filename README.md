@@ -1,3 +1,29 @@
+# v14 — Levelled Alankara and Ma–Pa Transition Academy
+
+## Curriculum changes
+Bansuri Guru now teaches **48 original exercises** across three independently selectable levels:
+- **Beginner:** 12 beginner alankaras/paltas and 4 slow Ma–Pa transition studies, generally 42–50 BPM.
+- **Intermediate:** 12 intermediate patterns (skips, reversal, groups of 4, triplet movement) and 4 Ma–Pa combination studies, ~55–65 BPM.
+- **Expert:** 12 advanced patterns (wide leaps, cascades, reversals, accented groupings) and 4 rapid Ma–Pa transition studies, ~76–86 BPM.
+
+All 48 patterns are original teaching material. Every exercise is playable through **Daily Practice → Alankara & Palta Academy → Practise**, opening Sur Quest with its currently selected Sa, pitch bar, fingering cues and two-second note stability requirement in Learn mode.
+
+The **Beginner / Intermediate / Expert** selector is shared with Sur Quest. Selecting a level immediately changes its core five missions. The choice is stored on the user's device and included in existing optional Firestore backup data as `learnerLevel`. Previously saved records without this property default to beginner.
+
+## Ma–Pa emphasis
+The timed five-stage guided riyaz has been reweighted: roughly **11/30 of the session for alankaras** and **9/30 for Ma–Pa transition practice**, with breath/long Sa, application and cool-down taking the remaining 10/30. The specific alankara and Ma–Pa drill rotate by calendar day and chosen difficulty. The original Bhupali and melody libraries remain available in their separate sections.
+
+Shuddha Ma often involves partial (half-hole) opening of the first finger hole. Pa may be obtained with all six holes closed using appropriate air support or with a technique-dependent alternative fingering. Both need teacher/instrument verification; the app shows a half-hole symbol for Ma and a six-hole Pa example rather than treating either as universal.
+
+## Adaptive teacher
+The personalized exercise always includes a Ma–Pa clinic and a level-appropriate alankara. It also retains weakness detection from measured pitch samples; consecutive Ma–Pa and Pa–Ma transitions are tracked separately when enough valid microphone evidence exists. These are note-pitch observations, **not rigorous timing, articulation or fingering scores**.
+
+## Testing, persistence and recovery
+JavaScript is syntax checked and exercise generation tested; real microphone and Cloudflare deployment must still be verified. No audio files are uploaded or stored. No new paid services or Firebase rules.
+- **Pre-v14 rollback:** https://github.com/medhrk/bansuri-guru/tree/restore/pre-alankara-levels-v14-2026-11-22
+- GitHub restores source code only. Back up user practice data separately with the app's Export feature before data migrations.
+
+---
 # v13 — Adaptive Riyaz Teacher
 
 **New:** "Today's focus" at the top of **Daily Practice** and **Sur Quest**. Tap "Start my personal practice" to open a generated **My Personal Riyaz** mission with swaras chosen based on your pitch history.

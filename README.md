@@ -1,3 +1,15 @@
+# v18 — Sign-in button visibility and stale browser cache fix
+
+After a signed-in user reported seeing both **Sign in with Google** and **Sign out** simultaneously, the account page now uses a redundant, explicit `hidden` attribute and inline `display:none`, synchronized from Firebase's real `onAuthStateChanged` state. The account page shows **Google connected** plus the account email and **Sign out** instead of a redundant sign-in prompt. Configuration options are in an optional "Firebase configuration (advanced)" disclosure and no longer occupy the main account card by default.
+
+The service worker cache was bumped to v18 and deletes older Bansuri Guru caches on activation to reduce stale asset collisions. If an older installed PWA remains controlled by a stale worker, close and reopen the page or refresh once after the new worker takes control.
+
+Existing Firebase authentication, Firestore security rules, cloud backups, community songs, and saved lesson data remain unchanged.
+
+Pre-fix rollback: https://github.com/medhrk/bansuri-guru/tree/restore/pre-auth-visible-fix-v18-2026-11-22
+
+---
+
 # v17 — Google sign-in button follows live authentication state
 
 - Under **Google & Backup**, **Sign in with Google** is hidden when Firebase confirms the user is already authenticated, including on a reloaded page after session restoration.

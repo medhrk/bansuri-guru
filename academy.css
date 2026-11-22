@@ -1,0 +1,48 @@
+/* Bansuri Guru Academy — design system */
+:root{--ink:#19362d;--green:#155b47;--gold:#d6aa61;--line:#e5e9df;--bg:#f5f7f0}
+body{background:#f5f7f0;color:#243e34;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}
+header{background:#102f27;padding:20px max(22px,calc((100vw - 1180px)/2));box-shadow:0 6px 25px #102f271a}header b{font-family:Georgia,serif;letter-spacing:-.5px}
+main{max-width:1180px;padding-top:24px}
+.hero{padding:30px 36px;border-radius:22px;background:radial-gradient(circle at 86% 15%,#4e8665 0%,transparent 42%),linear-gradient(125deg,#122e26,#24634d);box-shadow:0 10px 30px #153c2c20}
+.hero h1{font-size:clamp(28px,4vw,44px)}
+.hero .eyebrow{color:#e2c68b}
+.metrics{margin:20px 0}.metric{border-radius:16px;padding:18px 22px}.metric strong{color:#155b47}
+nav{position:sticky;top:0;z-index:12;background:#f5f7f0eF;backdrop-filter:blur(10px);padding:12px 0;border-bottom:1px solid #e0e7dc;margin-bottom:20px}
+nav button{border:0;background:transparent;border-radius:10px;color:#466257;padding:11px 14px;font-weight:700}
+nav button.active,nav button:hover{background:#155b47;color:white}
+.card{border-color:#e0e8da;box-shadow:0 5px 17px #112d1b08;padding:24px;border-radius:18px}
+button.primary{background:#155b47;border-color:#155b47}
+.academy-top{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}.academy-lead{border-radius:22px;color:white;padding:30px;background:linear-gradient(115deg,#143a2c,#2e7457);position:relative;overflow:hidden}.academy-lead:after{content:"♫";font-family:Georgia,serif;font-size:170px;position:absolute;right:10px;top:-55px;opacity:.07;pointer-events:none}.academy-lead h2{font-size:clamp(28px,3vw,38px);line-height:1.12;max-width:450px;margin:10px 0;font-family:Georgia,serif}.academy-lead p{color:#e4eede;max-width:450px}.academy-lead button{background:#edce8e;border-color:#edce8e;color:#183d30}.academy-side{background:#fffefa;border:1px solid #dfe7da;border-radius:22px;padding:26px}
+.kicker{text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800;color:#b08342}.academy-lead .kicker{color:#f0d9a3}
+.academy-progress{height:9px;border-radius:10px;overflow:hidden;background:#dfebdf;margin:12px 0}.academy-progress div{height:100%;background:#258f60;border-radius:10px}
+.academy-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:28px 0 12px}
+.academy-toolbar h2{margin:0;font-family:Georgia,serif}
+.academy-chips{display:flex;gap:7px;flex-wrap:wrap}.academy-chips button{border-radius:35px;padding:9px 14px}.academy-chips button.active{background:#155b47;color:white;border-color:#155b47}
+.academy-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.academy-card{background:#fffefa;border:1px solid #e0e6dc;border-radius:18px;padding:22px;min-width:0;transition:transform .15s}.academy-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px #132e2311}
+.academy-card h3{font-family:Georgia,serif;font-size:21px;line-height:1.2;margin:12px 0 7px}.academy-card p{color:#688073;font-size:13px;min-height:54px}
+.academy-badge{font-size:11px;font-weight:800;color:#1e6f55;background:#e8f3e6;padding:5px 9px;border-radius:40px;display:inline-flex}.academy-badge.gold{background:#f9efd9;color:#8e661e}
+.academy-card .num{font:26px Georgia,serif;color:#cba66a}.academy-card .foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.academy-card .foot button{font-size:12px}
+.academy-detail{background:#fffefa;border:1px solid #e0e6dc;border-radius:20px;padding:26px;margin-top:16px}
+.academy-detail h2{font-family:Georgia,serif}.academy-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:16px 0}
+.academy-step{background:#eff4eb;padding:15px;border-radius:13px}
+.academy-step small{display:block;color:#729080;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.academy-step strong{display:block;font-size:15px;margin-top:5px}
+.academy-notation{background:#102f27;color:#fff;border-radius:12px;padding:18px;letter-spacing:2px;font-size:19px;word-spacing:7px;margin:13px 0}
+.academy-help{background:#fff8e8;border-left:3px solid #c99a42;border-radius:7px;padding:12px 15px;margin:14px 0;font-size:14px}
+.academy-links{display:flex;flex-wrap:wrap;gap:9px;margin:13px 0}.academy-links a,.academy-action{display:inline-flex;text-decoration:none;align-items:center;gap:6px;padding:10px 12px;background:#eaf2e7;border:1px solid #d2e2d4;border-radius:9px;color:#1b674d;font-size:13px;font-weight:750}
+.academy-search{width:min(360px,100%)}
+.academy-songs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.academy-song{border:1px solid #e0e8dc;background:white;border-radius:15px;padding:18px}
+.academy-song h3{margin:6px 0 0;font-size:17px}.academy-song p{color:#74867b;margin:4px 0 12px;font-size:12px}
+.academy-song .academy-links{margin:9px 0}.academy-song .academy-links a{font-size:12px;padding:8px}
+.academy-resources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.academy-resource{background:white;padding:20px;border:1px solid #e0e7dc;border-radius:16px}
+.academy-resource h3{margin:8px 0;font-size:18px}.academy-resource p{color:#718174;font-size:13px}
+.academy-inline{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.academy-plan{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}.academy-plan div{padding:13px 7px;border-radius:12px;background:#e9f1e6;text-align:center}.academy-plan b{display:block;font-size:12px}.academy-plan small{font-size:11px;color:#628072}
+.academy-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+.academy-empty{padding:30px;text-align:center;color:#677f70}
+.academy-restore{margin-top:24px;padding:14px 18px;border:1px dashed #b4c8b6;border-radius:12px;background:#eff5e9;font-size:12px;color:#4c675b}
+@media(max-width:920px){.academy-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.academy-top{grid-template-columns:1fr}}
+@media(max-width:600px){.academy-cards,.academy-songs,.academy-resources,.academy-steps{grid-template-columns:1fr}.academy-lead,.academy-side,.academy-detail{padding:19px}.academy-plan{grid-template-columns:repeat(4,1fr)}nav{top:0}nav button{font-size:12px;padding:9px 10px}}

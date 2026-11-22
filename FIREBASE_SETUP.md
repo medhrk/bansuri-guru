@@ -4,6 +4,21 @@ Live site: https://bansuri-guru.medhrk.workers.dev/
 
 This release adds **optional** Google sign-in and Firestore per-user practice backups to the existing local-only app. Calendar OAuth stays separate and continues to work.
 
+## Public Bollywood notation sharing (v16)
+
+Users can save a song privately, then explicitly choose **Make public** in **Song Notebook**. Only **title, film/artist, and the user's sargam notation** are published to the separate `publicSongs` Firestore collection; practice logs, account details and unpublished notes stay within the private `users/{uid}/practice/current` document.
+
+**Administrator action required before sharing works:** Open your existing Firebase project → **Firestore Database → Rules**, replace the existing rules with the **complete updated `firestore.rules` file** in this repository, then click **Publish**. Publishing this GitHub file does **not** automatically deploy Firestore security rules. The site's Cloudflare hosting is separate from Firebase rules deployment.
+
+How users share:
+1. Connect Firebase and sign in with Google in **Google & Backup**.
+2. In **Song Notebook**, save a title, artist/film, and your own sargam. Choose **🌍 Make public** on that saved entry.
+3. Confirm the publication warning; only original/authorized notation should be shared, not copyrighted lyrics or unauthorized transcriptions.
+4. Public entries appear under **Community Bollywood Notations**, even for visitors who do not sign in (but Firebase must be configured).
+5. Use **🔒 Unpublish** to delete the public record while retaining the private note. Editing a published private note requires choosing **Update public copy**; the public edition does not change silently.
+
+The app cannot provide moderation at scale or determine copyright ownership. User reports, rate limiting, moderation and takedowns should be implemented before inviting large-scale public contributions. The current browser displays up to 80 publicly visible notations from Firestore, sorted client-side by update date; it does not claim full catalog coverage.
+
 ## One-time Firebase configuration
 
 1. Visit https://console.firebase.google.com/ and create or link a Firebase project.

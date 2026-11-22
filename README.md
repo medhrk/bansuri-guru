@@ -1,3 +1,20 @@
+# v20 — Phrase-by-phrase Bollywood and Bhakti teaching
+
+**Song Notebook → Song Learning Studio → Study** now offers a stepwise **Phrase-by-phrase teacher**, in addition to the full-song lesson.
+
+- Uses explicit `|` separators in a user's existing sargam notation to divide a song into teachable phrases. A song without separators is one phrase.
+- Each phrase has **Listen to phrase**, **Practise with teacher**, and **Mark manually practised** actions.
+- The next phrase is locked until the current one is completed. Microphone-verified completion requires every sounding note to have satisfied the existing two-second steady note hold in Sur Quest Learn mode, with **no skipped notes**. Rests are not treated as pitched notes.
+- A successful microphone-verified phrase records a rough percent-in-tune reading and adds a check mark. Manual practice is clearly shown separately as unverified and has **no pitch score**, but can unlock progress for users unable to enable the microphone.
+- Phrase unlock and verified score data are saved as `songPhraseProgress` in local practice data and the existing private Firestore backup. Saved private songs receive stable local lesson IDs to avoid losing progress if song positions change.
+- Shared community songs open the same Song Learning Studio phrase coach; visitors can practise user-contributed notation but the site does not independently verify licensing or musical accuracy.
+- Reference tones use the current selected flute Sa; original and user-authorized exercises only. No third-party audio or copyrighted scores are embedded.
+- Source recovery checkpoint before the release: https://github.com/medhrk/bansuri-guru/tree/restore/pre-phrase-lessons-v20-2026-11-23
+
+Limitations: phrase scoring depends on microphone detection quality and should not be interpreted as a professional music assessment. A successful phrase does not confirm the rhythm, ornamentation or melody transcription is authentic. Browser runtime on a real microphone is still unverified.
+
+---
+
 # v19 — Guided Bollywood and Bhakti Song Learning Studio
 
 A **Song Learning Studio** now appears at the top of **Song Notebook**. Learners can filter original practice melodies and their personal saved notes by **Bollywood**, **Bhakti**, or **Other**, search them by title or notation, listen to a synthesized note reference, and launch a guided Sur Quest lesson with the same notation.

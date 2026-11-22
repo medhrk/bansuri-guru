@@ -9,7 +9,24 @@ const plans=[
  {name:'Original film-style melody',ratio:7,taal:8,bpm:64,phrase:['S','R','G','P','G','R','S','—','R','G','P','D','P','G','R','S'],sub:'Practise this original, song-like phrase over Keharwa. No copyrighted melody is embedded.',tips:'Shape the phrase musically: breathe after the rest and resolve gently to Sa.'},
  {name:'Taal, cool-down & reflection',ratio:3,taal:6,bpm:60,phrase:['S','—','—','P','—','—'],sub:'Count Dadra (1 2 3 | 4 5 6), resolve to Sa and reflect.',tips:'Review what improved today, note difficult swaras, then save your session.'}
 ];
+const basePlans=plans.map(p=>({...p,phrase:p.phrase.slice()}));
 const ratioSum=plans.reduce((a,p)=>a+p.ratio,0);
+function configureLevel(){
+ const level=window.alankaraSchool?.active?.()||"beginner";
+ const items=window.alankaraSchool?.catalog?.(level)||[];
+ if(items.length<8)return;
+ const day=Math.floor(Date.now()/86400000),mp=items[day%4],alankaras=items.slice(4);
+ const a=alankaras[day%alankaras.length],b=alankaras[(day+5)%alankaras.length];
+ const stageContent=[
+ {name:"Breath and steady Sa · "+level,ratio:4,bpm:level==="expert"?58:48,phrase:["S","S","S","—","S","S","S","—"],sub:"Start with relaxed breathing and even Sa.",tips:"Aim for a stable two-second hold; quality is more important than volume."},
+ {name:"Alankara school · "+a.name,ratio:11,bpm:a.bpm,phrase:a.seq,sub:"Pattern "+a.name+": sing first, then repeat the pattern, slow to fast only when clean.",tips:a.help},
+ {name:"Ma–Pa transition clinic · "+mp.name,ratio:9,bpm:mp.bpm,phrase:mp.seq,sub:"Dedicated Ma–Pa control: "+mp.name,tips:mp.help+" Ma may require a half-hole and Pa another fingering or breath response; check your instrument."},
+ {name:"Alankara application · "+b.name,ratio:4,bpm:b.bpm,phrase:b.seq,sub:"Apply alankara fluency in a new rhythmic grouping.",tips:b.help},
+ {name:"Cool-down and reflection",ratio:2,bpm:48,phrase:["S","—","M","—","P","—","S","—"],sub:"Finish slowly and review Ma–Pa without rushing.",tips:"Make a note of rough transitions to revisit tomorrow."}
+ ];
+ for(let i=0;i<plans.length;i++)Object.assign(plans[i],basePlans[i],stageContent[i]);
+}
+
 let stages=[],index=0,elapsed=0,running=false,finished=false,logged=false,startStamp=0,timer=null,nextBeat=0,beatIndex=0,beatCount=0,progressSeconds=0,feedback={samples:0,inTune:0},stageFeedback=plans.map(()=>({samples:0,inTune:0})),micStream=null,micSource=null,micAnalyser=null,micFrame=null,metronome=true,referenceOn=false,micEnabled=false,beatPrimed=false,sessionStarted=false,lastPitchTime=0;
 const stepMs=()=>60000/plans[index].bpm;
 function alloc(total){const raw=plans.map(p=>p.ratio/ratioSum*total),mins=raw.map(x=>Math.floor(x)),fractions=raw.map((x,i)=>({i,part:x-Math.floor(x)})).sort((a,b)=>b.part-a.part);let rest=total-mins.reduce((a,b)=>a+b,0);for(let n=0;n<rest;n++)mins[fractions[n%fractions.length].i]++;return mins.map(x=>x*60)}
@@ -37,7 +54,7 @@ function toggle(){if(finished){reset();return}if(running){pause();return}if(!ses
 function shift(by){if(!stages.length)return;pause();index=Math.max(0,Math.min(plans.length-1,index+by));progressSeconds=stages.slice(0,index).reduce((a,b)=>a+b,0);stageRender();renderTick()}
 function next(){shift(1)}function previous(){shift(-1)}
 function finish(){running=false;finished=true;clearInterval(timer);timer=null;renderTick();try{tone(880,0,.2);tone(1174,.25,.2)}catch(e){}alert('Your guided riyaz is complete! Add your reflection, then save the session.')}
-function reset(){running=false;finished=false;sessionStarted=false;logged=false;clearInterval(timer);timer=null;index=0;progressSeconds=0;feedback={samples:0,inTune:0};stageFeedback=plans.map(()=>({samples:0,inTune:0}));stages=alloc(Number($g('goal').value)||s.goal||30);duration=totalSecs();left=duration;stageRender();renderTick();guidedHold.reset();holdNote='';window.setPitchMeter('guided',null);window.showSurHold('guided',0,2,'idle','Play a clear note to start the 2-second stability challenge.')}
+function reset(){configureLevel();running=false;finished=false;sessionStarted=false;logged=false;clearInterval(timer);timer=null;index=0;progressSeconds=0;feedback={samples:0,inTune:0};stageFeedback=plans.map(()=>({samples:0,inTune:0}));stages=alloc(Number($g('goal').value)||s.goal||30);duration=totalSecs();left=duration;stageRender();renderTick();guidedHold.reset();holdNote='';window.setPitchMeter('guided',null);window.showSurHold('guided',0,2,'idle','Play a clear note to start the 2-second stability challenge.')}
 function log(){if(!sessionStarted){alert('Start a guided session before logging.');return}if(logged){alert('Already logged.');return}pause();const mins=Math.max(1,Math.round(progressSeconds/60));const quality=feedback.samples?Math.round(feedback.inTune/feedback.samples*100):null;s.logs.push({day:date(),mins,note:($g('reflection').value||'').slice(0,1000),type:'guided',completed:finished,goalMinutes:Math.round(duration/60),pitchAccuracyEstimate:quality,pitchSamples:feedback.samples,segmentsFinished:plans.filter((_,i)=>progressSeconds>=endAtStage(i)).length});saveStore();stats();logged=true;$g('guidedLog').disabled=true;alert('Saved '+mins+' minute'+(mins!==1?'s':'')+' of guided riyaz'+(quality===null?' (no pitch score).':'; estimated in-tune samples '+quality+'%.'))}
 function tempo(value){const n=Math.min(180,Math.max(35,Number(value)||plans[index].bpm));plans[index].bpm=n;$g('guidedBpm').value=n;nextBeat=0;renderTick()}
 function metro(v){metronome=!!v}
@@ -47,6 +64,7 @@ const guidedHold=window.createSurHoldTracker(2);let holdNote='';let holdLast=0;f
 function pitchLoop(){if(!micAnalyser)return;const buffer=new Float32Array(micAnalyser.fftSize);micAnalyser.getFloatTimeDomainData(buffer);const hz=corr(buffer,ac().sampleRate);const intended=toneFreq(target());const now=performance.now();if(hz&&intended&&hz>=90&&hz<=1300){const result=window.compareSwaraPitch(hz,intended);const cents=Math.round(result.cents);$g('guidedMeasured').textContent=hz.toFixed(1)+' Hz';$g('guidedCents').textContent=result.label+' · '+(cents>0?'+':'')+cents+' cents';$g('guidedMeasured').classList.toggle('in-tune',result.near);window.setPitchMeter('guided',result);updateGuidedHold(result,now);if(running&&now-lastPitchTime>250){feedback.samples++;stageFeedback[index].samples++;if(result.near){feedback.inTune++;stageFeedback[index].inTune++}lastPitchTime=now}}else{$g('guidedMeasured').textContent=hz?'Different pitch':'Listening…';$g('guidedCents').textContent=intended?'Play the displayed note steadily':'This beat is a rest';$g('guidedMeasured').classList.remove('in-tune');window.setPitchMeter('guided',null);updateGuidedHold(null,now)}micFrame=requestAnimationFrame(pitchLoop)}
 async function micToggle(){if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;micSource?.disconnect();micSource=null;micAnalyser=null;cancelAnimationFrame(micFrame);micEnabled=false;$g('guidedMicBtn').textContent='🎙 Enable microphone';$g('guidedMeasured').textContent='Not enabled';guidedHold.reset();window.showSurHold('guided',0,2,'idle','Enable the microphone for the stability challenge.');window.setPitchMeter('guided',null);return}try{micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});micSource=ac().createMediaStreamSource(micStream);micAnalyser=ac().createAnalyser();micAnalyser.fftSize=4096;micSource.connect(micAnalyser);micEnabled=true;$g('guidedMicBtn').textContent='■ Stop microphone';pitchLoop()}catch(e){alert('Microphone requires HTTPS, permission and an available input: '+e.message)}}
 window.addEventListener('bansuri-sa-changed',()=>{renderTick();if($g('guidedMeasured')){guidedHold.reset();holdNote='';window.showSurHold('guided',0,2,'idle','Reference Sa changed. Start a new steady hold.');$g('guidedMeasured').textContent='Retuned';$g('guidedCents').textContent='Play again to check your new Sa reference'}});
+window.addEventListener('bansuri-level-changed',()=>{if(running)pause();reset()});
 window.guidedRiyaz={reset,toggle,next,previous,log,tempo,metro,reference,micToggle};
 create();reset();
 })();

@@ -1,3 +1,13 @@
+# Live bansuri selector — v9
+
+The practice screens now include a persistent **My bansuri** selector above the lesson content, visible in Daily Practice, Sur Quest, Raag/Taal/Bhakti, Sargam and Sur/Taal. It defaults to the currently saved Sa. It offers **A scale / measured Sa 436 Hz**, **A4 / 440 Hz**, A3, C4/C5, D5, G4 and E4, plus any custom measured Sa. Changing preset updates saved `s.sa` immediately and refreshes reference pitches and active note targets in Guided Riyaz and Sur Quest. The independent Daily Practice and Sur Quest selectors continue to work and synchronize. The existing Firestore backup schema already stores `sa`, so no migration or extra Firebase permissions are necessary.
+
+To set the user's observed A bansuri: select **A scale — My measured Sa (436 Hz)** from the on-screen selector during practice. The reading was reported with the three upper holes covered, bottom three open. Do not assume that 436 Hz is automatically the correct Sa for every A scale flute. Use a stable played reference and independent tuner for confirmation.
+
+Recovery: https://github.com/medhrk/bansuri-guru/tree/restore/pre-practice-flute-selector-2026-11-22 . Export local data before migrations: Git branches protect source code, not Firestore data.
+
+---
+
 # C Natural Medium flute frequency correction
 
 **Reported issue:** C flute not recognized when Sa was set to the old site default 261.63 Hz. Many C Natural Medium (C5 Sa) six-hole bansuris play Sa around **523.25 Hz**, with the top three holes covered; models labeled by a different convention or register can differ. Do not automatically overwrite existing people's saved values.

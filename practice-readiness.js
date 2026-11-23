@@ -29,6 +29,7 @@ function analyse(values,target){
 async function begin(){
  if(active){cleanup();message("Readiness check stopped. Microphone is off.");return}
  if(!navigator.mediaDevices?.getUserMedia||!window.AudioContext&&!window.webkitAudioContext){message("This browser does not support microphone readiness testing. You can still practise manually.");return}
+ window.toneStability?.stop?.();
  cleanup();const id=run;active=true;readings=[];audible=0;samples=0;
  const btn=$("readinessStart");if(btn)btn.textContent="■ Stop test";
  const target=Number(s.sa)||440;

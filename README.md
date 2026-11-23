@@ -1,3 +1,22 @@
+# v29 — Interactive Six-Hole Bansuri Fingering Guide
+
+A dedicated **🪈 Fingering** tab now includes a mobile-friendly, six-hole interactive reference with note buttons for S, r, R, g, G, M, M^, P, d, D, n, N and S'. It uses the currently selected flute Sa to calculate target note frequencies and lets learners audition the target tone or launch a short Sur Quest exercise.
+
+**Pedagogical scope:** the guide assumes the *three-holes-closed Hindustani Sa* convention, with holes numbered from the blowing end. Common introductory examples include Sa XXXOOO, Re XXOOOO, Ga XOOOOO, shuddha Ma partially uncovering hole 1, and the all-open option for tivra Ma. The all-closed lower Pa pattern must not be mistaken for middle Pa without a higher-register air stream. Middle Pa, Dha and Ni examples are explicitly marked as overblown / register-dependent. Komal Re, Ga, Dha and Ni do not show a falsely precise universal six-hole diagram; users are directed to a teacher or instrument-specific chart. Upper Sa is described as the three-closed-hole pattern in a higher register.
+
+The **Sur Quest** inline fingering display now links to this guide and includes clearer warnings for octave-sensitive Pa/Dha/Ni and altered notes. These visual examples **cannot** detect actual finger placement, and fingerings vary by instrument design, bore, hole placement and teaching school. Select and verify Sa with the mic tuner.
+
+**Relevant external reference charts (links only, no copyrighted charts copied):**
+- https://www.bansuriflute.co.uk/p/beginners-how-to-play-bansuri.html
+- https://www.anubodh.com/fingering-charts.php
+- https://oneworldflutes.com/BansuriChart.html
+
+No new cloud collection, AI service, account permission or backend is required. Static JavaScript tests have passed; on-device acoustics and live deployment remain unverified.
+
+Restore source before v29: https://github.com/medhrk/bansuri-guru/tree/restore/pre-fingering-guide-v29-2026-11-23
+
+---
+
 # v28 — Acoustic Tone & Breath-Related Stability
 
 **My Progress → Tone & Breath-Related Stability** now offers an optional six-second sustained Sa analysis. This is a measurement of **acoustic consistency**, not a medical breath test and not an assessment of actual breathing mechanics.

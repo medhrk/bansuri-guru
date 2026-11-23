@@ -1,3 +1,21 @@
+# v25 — Virtual Bansuri Teacher
+
+A **Virtual Bansuri Teacher** now appears at the top of **📊 My Progress**. This is a deterministic, entirely browser-based coaching experience, not a remote AI model.
+
+It uses existing local pitch and practice summaries:
+- Identifies weaker swaras only with at least **two measured attempts, ten or more valid samples**, and fewer than **75% near-target readings**. It recommends slow Sa-to-target exercises and a steady two-second hold, without claiming to know exact technique.
+- When enough recorded Ma–Pa/Pa–Ma evidence exists and shows poor pitch results, recommends a slow Ma–Pa transition drill. Without reliable transition measurements it gives a general exercise rather than inventing a diagnosis.
+- If many measured note attempts lack a saved two-second steady hold, suggests comfortable long-tone practice, explicitly acknowledging microphone-tracking uncertainty.
+- If no microphone-verified song phrase is saved, recommends an initial short phrase in Song Learning Studio.
+- Without enough samples, gives a starter routine instead of asserting personal weakness.
+- Creates a practical **15-minute routine** (3-minute warm-up, 5-minute sur work, 4-minute transitions, 3-minute song phrase), with an action to open personalized Sur Quest and another to copy the routine.
+
+**Privacy:** existing practice statistics are read locally; no audio, camera, AI API calls or new Firebase permissions are used. The advice does not diagnose embouchure, breath control, fingering or musical expression. Live microphone and Cloudflare runtime behavior still require on-device verification.
+
+Pre-v25 source checkpoint: https://github.com/medhrk/bansuri-guru/tree/restore/pre-virtual-teacher-v25-2026-11-23
+
+---
+
 # v24 — My Progress Dashboard
 
 A new **📊 My Progress** navigation tab presents the learner's saved musical practice evidence:

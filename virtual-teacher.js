@@ -44,6 +44,17 @@ function render(){
  const progress=window.bansuriProgress?.summary?.();if(!progress)return;
  const result=advice(progress,window.adaptiveTeacher);
  const head=node("div",undefined,"virtual-teacher-heading");head.append(node("div","🎓 Your Virtual Bansuri Teacher","virtual-teacher-title"),node("p","Evidence-based coaching from your saved practice. No camera, microphone or raw recordings are accessed for these recommendations.","muted"));host.append(head);
+ const checks=(Array.isArray(s.toneChecks)?s.toneChecks:[]).filter(x=>Number(x.sa)>0&&Math.abs(1200*Math.log2(Number(x.sa)/(Number(s.sa)||440)))<100).slice(-3);
+ if(checks.length>=2){
+  const pitch=checks.reduce((n,x)=>n+Number(x.pitchSD||0),0)/checks.length;
+  const level=checks.reduce((n,x)=>n+Number(x.volumeCV||0),0)/checks.length;
+  const tip=node("article",undefined,"virtual-teacher-tip");
+  tip.append(node("h4","Recent sustained-tone checks"));
+  tip.append(node("p","Across "+checks.length+" recent checks, measured pitch variation averaged "+Math.round(pitch)+" cents and microphone-volume variation averaged "+Math.round(level)+"%."));
+  tip.append(node("p",pitch>20?"Try comfortable sustained Sa notes and watch for steadier pitch.":"Keep your comfortable sustained-note practice going.", "virtual-teacher-action"));
+  tip.append(node("p","Microphone consistency cannot diagnose breathing or embouchure technique.","muted"));
+  host.append(tip);
+ }
  const list=node("div",undefined,"virtual-teacher-advice");
  for(const message of result.messages){
   const card=node("article",undefined,"virtual-teacher-tip");

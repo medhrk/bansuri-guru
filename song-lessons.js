@@ -139,8 +139,9 @@ function evaluateLoopRound(seq,bpm,token){
    const coverage=pitched.length?measured.length/pitched.length:0;
    const total=measured.reduce((a,n)=>a+n.heard,0),correct=measured.reduce((a,n)=>a+n.good,0);
    const accuracy=total?Math.round(correct/total*100):0;
-   // Require *every* pitched note to be measurable and >=75% overall accuracy.
-   resolve({coverage,accuracy,pass:pitched.length>0&&coverage===1&&accuracy>=75,measured:measured.length,totalNotes:pitched.length});
+   const weakCount=measured.filter(n=>n.heard>0&&n.good/n.heard<.60).length;
+   // Every note must be measured, aggregate pitch >=75%, and no note below 60%.
+   resolve({coverage,accuracy,pass:pitched.length>0&&coverage===1&&accuracy>=75&&weakCount===0,weakCount,measured:measured.length,totalNotes:pitched.length});
   }
   function sample(now){
    if(token!==loopState.token||!loopState.running)return finish();
@@ -202,7 +203,7 @@ async function beginPhraseLoop(){
    if(!loopState.running||token!==loopState.token)return;
    loopState.lastScore=verdict;
    const status=verdict.pass?"✓ Good intonation":"↻ Repeat at the same speed";
-   loopMessage(status+" · "+verdict.accuracy+"% in tune · "+verdict.measured+"/"+verdict.totalNotes+" notes measured.");
+   loopMessage(status+" · "+verdict.accuracy+"% in tune · "+verdict.measured+"/"+verdict.totalNotes+" notes measured"+(verdict.weakCount?" · "+verdict.weakCount+" notes need work":"")+".");
   }
   loopState.nodes=[];
   if(number>=settings.count){
@@ -242,7 +243,7 @@ function renderPhraseCoach(){
  const manual=document.createElement("button");manual.textContent="✓ Mark manually practised";manual.onclick=()=>{if(!confirm("Mark this phrase practised without microphone verification? This only unlocks the next phrase; no pitch accuracy is awarded."))return;completePhrase(false)};
  row.append(listen,start,manual);outer.append(row);
  const loop=document.createElement("div");loop.className="phrase-loop-panel";
- loop.innerHTML='<h4>🔁 Phrase Loop Trainer</h4><p class="muted">Repeat this phrase at a comfortable tempo. Choose automatic tempo increases, or select Adaptive tempo to listen to your flute and advance only after a good round. Each adaptive round plays a reference, then gives you a silent turn. Looping never unlocks a phrase.</p><div class="phrase-loop-settings"><label>Starting tempo (BPM)<input id="phraseLoopBpm" type="number" min="35" max="120" step="5" value="48"></label><label>Repetitions<select id="phraseLoopCount"><option value="2">2 times</option><option value="3" selected>3 times</option><option value="4">4 times</option><option value="6">6 times</option><option value="8">8 times</option></select></label></div><label class="phrase-loop-checkbox"><input type="checkbox" id="phraseLoopRise"> Increase tempo by 5 BPM after each repetition</label><label class="phrase-loop-checkbox"><input type="checkbox" id="phraseLoopAdaptive"> 🎙 Adaptive tempo: raise speed only after at least 75% in-tune playing and every note measured</label><div class="row"><button type="button" class="primary" id="phraseLoopStart">▶ Start loop</button><button type="button" id="phraseLoopSlow">Start slowly (40 BPM)</button></div><p id="phraseLoopStatus" role="status">Ready: listen and play the phrase repeatedly before your guided attempt.</p>';
+ loop.innerHTML='<h4>🔁 Phrase Loop Trainer</h4><p class="muted">Repeat this phrase at a comfortable tempo. Choose automatic tempo increases, or select Adaptive tempo to listen to your flute and advance only after a good round. Each adaptive round plays a reference, then gives you a silent turn. Looping never unlocks a phrase.</p><div class="phrase-loop-settings"><label>Starting tempo (BPM)<input id="phraseLoopBpm" type="number" min="35" max="120" step="5" value="48"></label><label>Repetitions<select id="phraseLoopCount"><option value="2">2 times</option><option value="3" selected>3 times</option><option value="4">4 times</option><option value="6">6 times</option><option value="8">8 times</option></select></label></div><label class="phrase-loop-checkbox"><input type="checkbox" id="phraseLoopRise"> Increase tempo by 5 BPM after each repetition</label><label class="phrase-loop-checkbox"><input type="checkbox" id="phraseLoopAdaptive"> 🎙 Adaptive tempo: raise speed only after ≥75% overall pitch accuracy, every note measured and no note below 60%</label><div class="row"><button type="button" class="primary" id="phraseLoopStart">▶ Start loop</button><button type="button" id="phraseLoopSlow">Start slowly (40 BPM)</button></div><p id="phraseLoopStatus" role="status">Ready: listen and play the phrase repeatedly before your guided attempt.</p>';
  outer.append(loop);
  $("phraseLoopStart").onclick=()=>loopState.running?stopPhraseLoop():beginPhraseLoop();
  $("phraseLoopAdaptive").onchange=()=>{$("phraseLoopRise").disabled=$("phraseLoopAdaptive").checked;$("phraseLoopRise").checked=false;stopPhraseLoop(false)};

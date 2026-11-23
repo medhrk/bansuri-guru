@@ -1,3 +1,19 @@
+# v23 — Private bansuri phrase audio recording
+
+**New:** Under **Song Notebook → Song Learning Studio → Study → Phrase-by-phrase teacher**, each phrase now has **My flute recording**. Record up to 45 seconds, play back a saved take, separately play the synthesised reference notes, download an audio file, and delete individual takes.
+
+- **Privacy:** raw audio is stored **only in this browser** using IndexedDB. It is not uploaded to Firebase/Firestore, included in the existing Google backup, or published with community-supplied notation. Anybody with access to the same browser profile/device may be able to listen to local saved recordings; audio isn't separately encrypted.
+- A maximum of 50 locally stored takes is enforced. Each take is limited to 8 MB; the MediaRecorder MIME type depends on browser support (WebM/Opus, MP4/M4A or Ogg when available).
+- Playback references are synthesized from the current flute Sa; playback is refused while the mic is actively recording so the reference sound is not accidentally captured in the take.
+- If the app loses foreground visibility, the user navigates away, or the phrase changes, an in-progress recording is discarded and microphone tracks are stopped. Previously saved takes remain.
+- Recordings are grouped by the selected song identifier, phrase number and note sequence, with a creation timestamp. There is no pitch score attached to recordings; use Sur Quest's microphone assessment for approximate pitch feedback.
+- **Device retention:** IndexedDB is origin- and browser-profile-specific. Clearing site data, switching browsers/devices or private browsing may make recordings unavailable. Download important takes explicitly.
+- This introduces no new Firebase permissions or backend. It requires microphone permission, HTTPS and an IndexedDB/MediaRecorder capable browser.
+
+Source restore point before v23: https://github.com/medhrk/bansuri-guru/tree/restore/pre-phrase-recording-v23-2026-11-23
+
+---
+
 # v22 — Adaptive Phrase Loop Tempo
 
 **Song Notebook → Song Learning Studio → Study → Phrase Loop Trainer** now includes an optional **🎙 Adaptive tempo** setting in addition to manual repetition and automatic +5 BPM per round.

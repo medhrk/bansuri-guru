@@ -1,3 +1,22 @@
+# v24 — My Progress Dashboard
+
+A new **📊 My Progress** navigation tab presents the learner's saved musical practice evidence:
+- **Practice time and 7-day activity:** minutes from logged practice sessions, not extrapolated time or passive site use.
+- **Overall pitch accuracy:** weighted near-target microphone readings on the currently selected flute Sa, calculated from recent saved note-attempt summaries; excludes skipped/unmeasured notes and notes measured for other flute references.
+- **Steady-note holds:** counts saved swara attempts marked as having completed the two-second hold, not a continuous duration total.
+- **Song phrase milestones:** distinguishes microphone-verified phrase completion from other unlocked steps, including unverified manual completion.
+- **Per-swara performance:** individual measured pitch rates with their underlying sample counts and steady-hold counts.
+- **Recent Sur Quest results:** last eight available microphone-scored missions, plus any logged guided Riyaz pitch estimate.
+- **Private recording inventory:** counts local IndexedDB audio takes, distinct recorded phrases and approximate duration. Only summary counts are read; no audio is played or uploaded by the dashboard.
+
+The dashboard is built client-side; it does not introduce new public data access, cloud data collections, audio uploads or Firebase rules. When history is empty, it explicitly states that there is insufficient evidence. The interface is responsive for mobile phones and older desktop browsers.
+
+Restore before v24: https://github.com/medhrk/bansuri-guru/tree/restore/pre-progress-dashboard-v24-2026-11-23
+
+Live browser deployment and microphone/IndexedDB integration still need real-device verification.
+
+---
+
 # v23 — Private bansuri phrase audio recording
 
 **New:** Under **Song Notebook → Song Learning Studio → Study → Phrase-by-phrase teacher**, each phrase now has **My flute recording**. Record up to 45 seconds, play back a saved take, separately play the synthesised reference notes, download an audio file, and delete individual takes.

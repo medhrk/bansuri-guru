@@ -33,7 +33,7 @@ function reportGrade(result){
  return {passed,accuracy,observed:clear.length,expected:pitched.length,holds:held.length,skipped:skips.size};
 }
 function start(){
- window.practiceReadiness?.stop?.();
+ window.practiceReadiness?.stop?.();window.toneStability?.stop?.();
  if(session?.active&&!confirm("Replace your current interactive session?"))return;
  session={active:true,id:"live"+(++sequence)+"-"+Date.now(),index:0,retries:0,plan:buildPlan(),results:[],last:null,sa:Number(s.sa)||440};
  render();launch();

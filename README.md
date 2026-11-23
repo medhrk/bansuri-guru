@@ -1,3 +1,22 @@
+# v22 — Adaptive Phrase Loop Tempo
+
+**Song Notebook → Song Learning Studio → Study → Phrase Loop Trainer** now includes an optional **🎙 Adaptive tempo** setting in addition to manual repetition and automatic +5 BPM per round.
+
+Adaptive mode uses separate **Listen** and **Your turn** phases for each repetition:
+1. The app plays the user's selected phrase as reference tones at the current tempo.
+2. The tones stop; after a short silence, the learner plays the phrase on the bansuri for one phrase-length while the microphone checks pitch for each swara.
+3. To increase by **5 BPM**, the attempt must have usable pitch readings for **every sounding note** (minimum two per note), at least **75% overall near-target pitch checks**, and no individual note with fewer than **60%** near-target checks.
+4. If checks are missing or outside the pitch range, the tempo is **held constant** and another round begins. Rests are not scored.
+5. The loop ends after the selected number of repetitions. No automatic unlock or graded phrase certificate is awarded; phrase mastery remains in Sur Quest's two-second stability lessons.
+
+The selected flute's reference Sa is used throughout. Microphone access is requested only upon clicking Start in adaptive mode; the browser microphone stream is stopped on Stop, lesson change, navigation, tab backgrounding or completion. Sound is synthesized from original/user-authorized notation, not commercially licensed recordings.
+
+**Limitations:** This is early browser-based approximate pitch assessment, not validated note timing or musical performance evaluation. Microphone noise, instrument harmonics, browser timing jitter and playback bleed may affect scores. Practice with headphones if possible, and test on the deployed device.
+
+Restore source before v22: https://github.com/medhrk/bansuri-guru/tree/restore/pre-adaptive-tempo-v22-2026-11-23
+
+---
+
 # v21 — Phrase Loop Trainer
 
 The Song Learning Studio phrase coach now offers **Phrase Loop Trainer**: set 35–120 BPM, choose 2, 3, 4, 6 or 8 repetitions, optionally increase tempo by 5 BPM after each repetition, or use a 40 BPM shortcut. The app synthesizes only the sargam reference notes relative to the selected Sa; rests remain silent. Start / Stop controls cancel pending scheduled tones. Loops also stop when switching phrases, opening a guided lesson, leaving Song Notebook, or backgrounding the page. Loop completion does not award pitch scores or unlock phrases; those remain in the separate microphone-guided lesson or explicitly unverified manual action.

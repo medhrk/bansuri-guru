@@ -1,3 +1,19 @@
+# v27 — Practice Readiness Check
+
+**My Progress** now includes an optional microphone and Sa readiness check before the Interactive Teacher.
+
+- Clearly displays the currently selected flute Sa in hertz and asks the learner to sustain Sa for approximately five seconds.
+- On explicit tap, requests microphone permission, samples pitch locally via the app's existing autocorrelation detector, and compares the median detected pitch against the selected Sa. Close readings (within ±35 cents), likely octave mismatches, weak/inconsistent detection and denied permissions have distinct feedback.
+- Never records, saves, streams, or uploads raw audio. Tracks are stopped immediately on completion, manual Stop, page hidden, tab switch, navigation, Sa change or start of an interactive lesson.
+- **Continue without testing** launches the interactive teacher without a fabricated readiness grade. This is a brief preliminary input check, not a calibration, diagnosis, assessment of flute technique or guarantee that later scoring is reliable.
+- The check does not modify existing microphone scoring, historical practice scores, Firebase rules, or cloud backup data.
+
+Restore checkpoint before implementation: https://github.com/medhrk/bansuri-guru/tree/restore/pre-practice-readiness-v27-2026-11-23
+
+Browser microphone operation still needs an on-device test; only static syntax checks and representative pitch-result logic tests have been done.
+
+---
+
 # v26 — Interactive teacher-led bansuri session
 
 **My Progress → Virtual Bansuri Teacher → Start interactive teacher** now begins a four-stage, one-exercise-at-a-time coaching session:

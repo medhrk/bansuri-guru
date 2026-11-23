@@ -52,7 +52,7 @@ async function recordingStats(){
 let generation=0;
 async function render(){
  const target=$("progressDashboard");if(!target)return;
- const gen=++generation,report=summary();target.replaceChildren();window.virtualBansuriTeacher?.render?.();
+ const gen=++generation,report=summary();target.replaceChildren();window.virtualBansuriTeacher?.render?.();window.liveBansuriTeacher?.render?.();
  const header=el("div",undefined,"progress-heading");header.append(el("h2","Your Bansuri Journey"),el("p","Your progress is calculated from saved practice, microphone evidence and local recordings. Manual practice is never presented as a measured pitch score.","muted"));target.append(header);
  const grid=el("div",undefined,"progress-stats");
  addStat(grid,"Practice time",report.minutes+" min",report.sessions+" logged sessions");

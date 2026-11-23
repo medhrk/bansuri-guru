@@ -59,7 +59,7 @@ function draw(){
  if(!filtered.length){const p=document.createElement("p");p.className="muted";p.textContent="No matching lessons. Try a different filter or save your own notation.";list.append(p)}
 }
 function select(item){
- stopPhraseLoop(false);selected=item;const detail=$("songLessonDetail");if(!detail)return;detail.replaceChildren();
+ stopPhraseLoop(false);window.bansuriRecorder?.halt?.();selected=item;const detail=$("songLessonDetail");if(!detail)return;detail.replaceChildren();
  const title=document.createElement("h3");title.textContent=item.title;
  const parsed=parse(item.notation);
  const sub=document.createElement("p");sub.className="muted";sub.textContent=item.description||"Listen to each phrase, identify the swaras, then play it slowly with your microphone.";
@@ -235,7 +235,7 @@ function renderPhraseCoach(){
  const row=document.createElement("div");row.className="row";
  const listen=document.createElement("button");listen.textContent="♫ Listen to phrase";listen.onclick=()=>{try{const base=Number(s.sa)||440;seq.forEach((n,i)=>{if(n!=="—"&&semitones[n]!==undefined)tone(base*Math.pow(2,semitones[n]/12),i*.65,.4)})}catch(e){alert(e.message)}};
  const start=document.createElement("button");start.textContent="🎙 Practise with teacher";start.className="primary";start.onclick=()=>{
-  stopPhraseLoop(false);
+  stopPhraseLoop(false);window.bansuriRecorder?.halt?.();
   const mission={id:"phrase-"+String(item.key||"song").slice(0,40)+"-"+phraseSession.index,name:String(item.title).slice(0,75)+" · Phrase "+(phraseSession.index+1),kind:"Song phrase",bpm:48,seq:seq.slice(),help:"Listen, sing, then play each swara. Two seconds of steady pitch per note. Phrase progress is earned only with measured completion."};
   if(!window.surQuest?.openExercise?.(mission))return;
   tab("quest");
@@ -248,6 +248,8 @@ function renderPhraseCoach(){
  $("phraseLoopStart").onclick=()=>loopState.running?stopPhraseLoop():beginPhraseLoop();
  $("phraseLoopAdaptive").onchange=()=>{$("phraseLoopRise").disabled=$("phraseLoopAdaptive").checked;$("phraseLoopRise").checked=false;stopPhraseLoop(false)};
  $("phraseLoopSlow").onclick=()=>{stopPhraseLoop(false);$("phraseLoopBpm").value="40";loopMessage("Set to 40 BPM. Press Start loop when ready.")};
+
+ const recording=document.createElement("div");recording.id="phraseRecording";recording.className="phrase-recording-panel";outer.append(recording);window.bansuriRecorder?.mount?.(item,phraseSession.index,seq);
 
  const msg=document.createElement("p");msg.className="muted";msg.id="phraseCoachStatus";msg.textContent="Unlocked "+Math.min(total,unlocked(item)+1)+" of "+total+" phrases. Mastery needs microphone-verified practice.";outer.append(msg);
 }
@@ -276,7 +278,7 @@ function handleQuestFinish(report){
 window.addEventListener("bansuri-quest-finished",e=>handleQuestFinish(e.detail));
 
 function openLesson(item,parsed){
- stopPhraseLoop(false);
+ stopPhraseLoop(false);window.bansuriRecorder?.halt?.();
  if(!window.surQuest?.openExercise){alert("Sur Quest is unavailable. Reload Bansuri Guru and try again.");return}
  const prior=document.querySelector("#quest:not(.hidden)");
  if(!window.surQuest.openExercise({id:"song-"+String(item.key||"community").slice(0,75),name:String(item.title).slice(0,100),kind:(item.kind||"Song")+" notation",bpm:52,seq:parsed.notes.slice(),help:"Play the notes you selected from "+item.source+". Hold each pitch steadily; rest where marked. This is user-supplied notation, not a verified official score."}))return;
@@ -284,7 +286,7 @@ function openLesson(item,parsed){
  if(prior)window.scrollTo({top:0,behavior:"smooth"});
 }
 function openCommunity(item){
- stopPhraseLoop(false);
+ stopPhraseLoop(false);window.bansuriRecorder?.halt?.();
  const p=parse(item.notation);
  if(p.error){alert(p.error);return}
  tab("songs");select({title:item.title,film:item.film||"",notation:item.notation,kind:"Bollywood",source:"Community shared notation",key:"community-"+item.id});

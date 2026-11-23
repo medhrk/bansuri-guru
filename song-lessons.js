@@ -33,7 +33,7 @@ function parse(text){
 }
 const $=id=>document.getElementById(id);
 let selected=null,filter="All",phraseSession=null;
-let loopState={running:false,token:0,timer:null,nodes:[],iteration:0,bpm:48,phraseId:""};
+let loopState={running:false,token:0,timer:null,nodes:[],iteration:0,bpm:48,phraseId:"",stream:null,source:null,analyser:null,frame:0,lastMicSample:0,adaptive:false,phase:"idle",lastScore:null};
 function form(){
  const el=$("songLessonStudio");if(!el)return;
  if(Array.isArray(s.songs)){let changed=false;for(const item of s.songs){if(!item.lessonId){item.lessonId=crypto.randomUUID().replace(/-/g,"");changed=true}}if(changed)saveStore()}
@@ -87,6 +87,10 @@ function saveUnlock(item,number,verified=false,score=null){const p=progressStore
 
 function stopPhraseLoop(announce=true){
  loopState.token++;
+ if(loopState.frame){cancelAnimationFrame(loopState.frame);loopState.frame=0}
+ if(loopState.source){try{loopState.source.disconnect()}catch{}loopState.source=null}
+ if(loopState.stream){loopState.stream.getTracks().forEach(track=>track.stop());loopState.stream=null}
+ loopState.analyser=null;loopState.phase="idle";loopState.lastMicSample=0;
  if(loopState.timer!==null){clearTimeout(loopState.timer);loopState.timer=null}
  for(const osc of loopState.nodes){try{osc.stop()}catch{}try{osc.disconnect()}catch{}}
  loopState.nodes=[];
@@ -101,7 +105,8 @@ function loopSettings(){
  const bpm=Math.max(35,Math.min(120,Number($("phraseLoopBpm")?.value)||48));
  const count=Math.max(1,Math.min(8,Number($("phraseLoopCount")?.value)||3));
  const rise=!!$("phraseLoopRise")?.checked;
- return {bpm,count,rise}
+ const adaptive=!!$("phraseLoopAdaptive")?.checked;
+ return {bpm,count,rise,adaptive}
 }
 function scheduleLoopCycle(seq,bpm){
  const context=ac(),beat=60/bpm,base=Number(s.sa)||440;
@@ -119,6 +124,42 @@ function scheduleLoopCycle(seq,bpm){
  });
  return Math.ceil((seq.length*beat+.18)*1000)
 }
+function evaluateLoopRound(seq,bpm,token){
+ return new Promise(resolve=>{
+  if(!loopState.analyser||!loopState.stream||token!==loopState.token)return resolve(null);
+  const beat=60000/bpm,duration=beat*seq.length,started=performance.now(),notes=seq.map(()=>({heard:0,good:0})),buffer=new Float32Array(loopState.analyser.fftSize);
+  loopState.phase="play";
+  loopMessage("Your turn: play the phrase at "+bpm+" BPM. No reference tones during assessment.");
+  let settled=false;
+  function finish(){
+   if(settled)return;settled=true;
+   loopState.frame=0;
+   const pitched=notes.filter((_,i)=>seq[i]!=="—");
+   const measured=pitched.filter(n=>n.heard>=2);
+   const coverage=pitched.length?measured.length/pitched.length:0;
+   const total=measured.reduce((a,n)=>a+n.heard,0),correct=measured.reduce((a,n)=>a+n.good,0);
+   const accuracy=total?Math.round(correct/total*100):0;
+   // Require *every* pitched note to be measurable and >=75% overall accuracy.
+   resolve({coverage,accuracy,pass:pitched.length>0&&coverage===1&&accuracy>=75,measured:measured.length,totalNotes:pitched.length});
+  }
+  function sample(now){
+   if(token!==loopState.token||!loopState.running)return finish();
+   if(now-started>=duration)return finish();
+   if(now-loopState.lastMicSample>=125){
+    loopState.lastMicSample=now;
+    const step=Math.min(seq.length-1,Math.floor((now-started)/beat));
+    const n=seq[step];
+    if(n!=="—"&&semitones[n]!==undefined){
+      loopState.analyser.getFloatTimeDomainData(buffer);
+      const pitch=corr(buffer,ac().sampleRate),expected=(Number(s.sa)||440)*Math.pow(2,semitones[n]/12);
+      if(pitch>0&&expected>0){const result=window.compareSwaraPitch(pitch,expected);notes[step].heard++;if(result.near)notes[step].good++}
+    }
+   }
+   loopState.frame=requestAnimationFrame(sample);
+  }
+  loopState.frame=requestAnimationFrame(sample);
+ })
+}
 async function beginPhraseLoop(){
  if(!phraseSession)return;
  stopPhraseLoop(false);
@@ -126,27 +167,54 @@ async function beginPhraseLoop(){
  const seq=parsed.groups[index]?.slice(),settings=loopSettings();
  if(!seq?.length)return;
  const sessionId=phraseKey(item)+"-"+index,token=loopState.token;
- loopState.running=true;loopState.iteration=0;loopState.bpm=settings.bpm;loopState.phraseId=sessionId;
+ loopState.running=true;loopState.iteration=0;loopState.bpm=settings.bpm;loopState.phraseId=sessionId;loopState.adaptive=settings.adaptive;
  const start=$("phraseLoopStart");if(start)start.textContent="■ Stop loop";
- try{await ac().resume()}catch(e){stopPhraseLoop(false);loopMessage("Audio unavailable: "+e.message);return}
+ try{
+  const context=ac();await context.resume();
+  if(settings.adaptive){
+   if(!navigator.mediaDevices?.getUserMedia)throw Error("Microphone is not supported on this browser.");
+   const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+   if(token!==loopState.token){stream.getTracks().forEach(t=>t.stop());return}
+   loopState.stream=stream;loopState.source=context.createMediaStreamSource(stream);
+   loopState.analyser=context.createAnalyser();loopState.analyser.fftSize=4096;
+   loopState.source.connect(loopState.analyser);
+  }
+ }catch(e){stopPhraseLoop(false);loopMessage("Could not start adaptive practice: "+e.message+". For no-mic practice, turn off Adaptive tempo.");return}
  if(token!==loopState.token)return;
- function cycle(){
+ async function cycle(){
   if(!loopState.running||token!==loopState.token)return;
   const number=++loopState.iteration,bpm=loopState.bpm;
-  loopMessage("Playing repetition "+number+" of "+settings.count+" at "+bpm+" BPM. Listen, then play along.");
+  loopState.phase="listen";
+  loopMessage("Round "+number+"/"+settings.count+" at "+bpm+" BPM: first listen to the reference phrase.");
   let wait;
   try{wait=scheduleLoopCycle(seq,bpm)}catch(e){stopPhraseLoop(false);loopMessage("Audio playback failed: "+e.message);return}
-  loopState.timer=setTimeout(()=>{
+  // Await reference playback; never evaluate mic while synthesized reference notes sound.
+  await new Promise(resolve=>{loopState.timer=setTimeout(resolve,wait)});
+  loopState.timer=null;
+  if(!loopState.running||token!==loopState.token)return;
+  // A short quiet gap reduces residual speaker tone being read as the user's flute.
+  let verdict=null;
+  if(settings.adaptive){
+   await new Promise(resolve=>{loopState.timer=setTimeout(resolve,250)});
+   loopState.timer=null;
    if(!loopState.running||token!==loopState.token)return;
-   loopState.nodes=[];
-   if(number>=settings.count){
-    stopPhraseLoop(false);
-    loopMessage("✓ "+number+" repetitions completed. Now try microphone-guided phrase practice.");
-    return;
-   }
-   if(settings.rise)loopState.bpm=Math.min(120,loopState.bpm+5);
-   cycle();
-  },wait);
+   verdict=await evaluateLoopRound(seq,bpm,token);
+   if(!loopState.running||token!==loopState.token)return;
+   loopState.lastScore=verdict;
+   const status=verdict.pass?"✓ Good intonation":"↻ Repeat at the same speed";
+   loopMessage(status+" · "+verdict.accuracy+"% in tune · "+verdict.measured+"/"+verdict.totalNotes+" notes measured.");
+  }
+  loopState.nodes=[];
+  if(number>=settings.count){
+   const finalText=settings.adaptive?(verdict?.pass?"Final round passed.":"Finished. Repeat this tempo to improve consistency."):"All loops played.";
+   stopPhraseLoop(false);loopMessage(finalText+" Try guided phrase practice for verified progression.");
+   return;
+  }
+  if(settings.adaptive){
+   if(verdict?.pass)loopState.bpm=Math.min(120,loopState.bpm+5);
+  }else if(settings.rise)loopState.bpm=Math.min(120,loopState.bpm+5);
+  if(token!==loopState.token||!loopState.running)return;
+  loopState.timer=setTimeout(()=>{loopState.timer=null;cycle()},settings.adaptive?950:150);
  }
  cycle();
 }
@@ -174,9 +242,10 @@ function renderPhraseCoach(){
  const manual=document.createElement("button");manual.textContent="✓ Mark manually practised";manual.onclick=()=>{if(!confirm("Mark this phrase practised without microphone verification? This only unlocks the next phrase; no pitch accuracy is awarded."))return;completePhrase(false)};
  row.append(listen,start,manual);outer.append(row);
  const loop=document.createElement("div");loop.className="phrase-loop-panel";
- loop.innerHTML='<h4>🔁 Phrase Loop Trainer</h4><p class="muted">Repeat this phrase at a comfortable tempo. Optionally raise speed by 5 BPM each repetition. Looping is for practice and does not unlock or score a phrase.</p><div class="phrase-loop-settings"><label>Starting tempo (BPM)<input id="phraseLoopBpm" type="number" min="35" max="120" step="5" value="48"></label><label>Repetitions<select id="phraseLoopCount"><option value="2">2 times</option><option value="3" selected>3 times</option><option value="4">4 times</option><option value="6">6 times</option><option value="8">8 times</option></select></label></div><label class="phrase-loop-checkbox"><input type="checkbox" id="phraseLoopRise"> Increase tempo by 5 BPM after each repetition</label><div class="row"><button type="button" class="primary" id="phraseLoopStart">▶ Start loop</button><button type="button" id="phraseLoopSlow">Start slowly (40 BPM)</button></div><p id="phraseLoopStatus" role="status">Ready: listen and play the phrase repeatedly before your guided attempt.</p>';
+ loop.innerHTML='<h4>🔁 Phrase Loop Trainer</h4><p class="muted">Repeat this phrase at a comfortable tempo. Choose automatic tempo increases, or select Adaptive tempo to listen to your flute and advance only after a good round. Each adaptive round plays a reference, then gives you a silent turn. Looping never unlocks a phrase.</p><div class="phrase-loop-settings"><label>Starting tempo (BPM)<input id="phraseLoopBpm" type="number" min="35" max="120" step="5" value="48"></label><label>Repetitions<select id="phraseLoopCount"><option value="2">2 times</option><option value="3" selected>3 times</option><option value="4">4 times</option><option value="6">6 times</option><option value="8">8 times</option></select></label></div><label class="phrase-loop-checkbox"><input type="checkbox" id="phraseLoopRise"> Increase tempo by 5 BPM after each repetition</label><label class="phrase-loop-checkbox"><input type="checkbox" id="phraseLoopAdaptive"> 🎙 Adaptive tempo: raise speed only after at least 75% in-tune playing and every note measured</label><div class="row"><button type="button" class="primary" id="phraseLoopStart">▶ Start loop</button><button type="button" id="phraseLoopSlow">Start slowly (40 BPM)</button></div><p id="phraseLoopStatus" role="status">Ready: listen and play the phrase repeatedly before your guided attempt.</p>';
  outer.append(loop);
  $("phraseLoopStart").onclick=()=>loopState.running?stopPhraseLoop():beginPhraseLoop();
+ $("phraseLoopAdaptive").onchange=()=>{$("phraseLoopRise").disabled=$("phraseLoopAdaptive").checked;$("phraseLoopRise").checked=false;stopPhraseLoop(false)};
  $("phraseLoopSlow").onclick=()=>{stopPhraseLoop(false);$("phraseLoopBpm").value="40";loopMessage("Set to 40 BPM. Press Start loop when ready.")};
 
  const msg=document.createElement("p");msg.className="muted";msg.id="phraseCoachStatus";msg.textContent="Unlocked "+Math.min(total,unlocked(item)+1)+" of "+total+" phrases. Mastery needs microphone-verified practice.";outer.append(msg);

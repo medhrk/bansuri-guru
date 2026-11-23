@@ -1,3 +1,20 @@
+# v28 — Acoustic Tone & Breath-Related Stability
+
+**My Progress → Tone & Breath-Related Stability** now offers an optional six-second sustained Sa analysis. This is a measurement of **acoustic consistency**, not a medical breath test and not an assessment of actual breathing mechanics.
+
+- Requires explicit microphone permission and analyses roughly 6.5 seconds of sustained sound locally using the existing autocorrelation pitch detector.
+- Shows within-take pitch variation (standard deviation of detected pitch in cents after filtering distant outliers), proportion of readings near the selected Sa, variation in microphone-level RMS amplitude, and approximate detected onset delay.
+- Gives conservative, conditional practice tips for steady sustained Sa and microphone distance. Numeric thresholds are simple practice heuristics, not clinically or pedagogically validated norms.
+- Keeps up to 30 summary measurements **only in local browser storage**, not Firebase backup; audio waveforms are neither recorded nor uploaded. Clears microphone input on completion, Stop, tab change, app backgrounding or changing flute reference.
+- The Virtual Teacher can use up to three recent acoustic checks for the same flute scale to offer additional practice suggestions, while explicitly distinguishing measured pitch/loudness variation from breath capacity or embouchure.
+- Readiness Check, tone analysis and Interactive Teacher now release one another's microphone streams before starting, reducing input conflicts.
+
+**Limitations:** Room noise, automatic gain control, mobile-device microphone response, player-to-microphone distance, pitch detection harmonics and browser timing can distort acoustic measurements. No direct assessment of lung function, finger technique, breath support or tone quality is claimed.
+
+Pre-v28 restore: https://github.com/medhrk/bansuri-guru/tree/restore/pre-tone-stability-v28-2026-11-23
+
+---
+
 # v27 — Practice Readiness Check
 
 **My Progress** now includes an optional microphone and Sa readiness check before the Interactive Teacher.

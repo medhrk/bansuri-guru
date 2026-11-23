@@ -1,3 +1,22 @@
+# v26 — Interactive teacher-led bansuri session
+
+**My Progress → Virtual Bansuri Teacher → Start interactive teacher** now begins a four-stage, one-exercise-at-a-time coaching session:
+
+1. **Sa warm-up:** three sustained Sa notes.
+2. **Target swara:** picks the weakest sufficiently observed swara (at least two attempts and ten samples, under 75% near-target); otherwise uses a Sa–Ga foundation.
+3. **Ma–Pa finger transitions:** emphasises Ma–Pa back-and-forth when existing reliable transition measurements indicate difficulty.
+4. **Short original musical phrase:** connects notes into a simple melody.
+
+Each stage launches the existing **Sur Quest Learn mode**, which gives real microphone pitch feedback, note fingering guidance and the two-second steady-note hold. A stage passes only if **every sounding note** has at least three observed microphone frames and a recorded steady hold, none is skipped, and measured near-target pitch accuracy is **at least 70%**. Rests are not pitch-graded.
+
+After each finished Sur Quest mission, the browser returns to **My Progress** and displays the coach's evidence-based result. A failed stage can be retried; after two unsuccessful attempts the coach simplifies an overlong note sequence but **never weakens the passing standard**. Users may explicitly mark a stage unverified and proceed if they cannot use the mic. Unverified steps are never presented as scored or mastered.
+
+The session stays in browser memory during navigation and is not uploaded. Verified pitch observations still use the existing Sur Quest practice backup system. No AI API, new credentials, audio recordings, server-side processing or new Firebase rules were introduced. Microphone measurements cannot reliably identify embouchure, posture, breath technique or actual finger placement. Live browser microphone testing is still required.
+
+Pre-v26 source restore: https://github.com/medhrk/bansuri-guru/tree/restore/pre-live-teacher-v26-2026-11-23
+
+---
+
 # v25 — Virtual Bansuri Teacher
 
 A **Virtual Bansuri Teacher** now appears at the top of **📊 My Progress**. This is a deterministic, entirely browser-based coaching experience, not a remote AI model.

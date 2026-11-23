@@ -83,6 +83,7 @@ function finish(token,target){
 async function start(){
  if(state.running){cleanup();message("Tone analysis stopped. Microphone is off.");return}
  if(!navigator.mediaDevices?.getUserMedia||!window.AudioContext&&!window.webkitAudioContext){message("Browser microphone analysis is unavailable. Practice can continue without it.");return}
+ window.practiceReadiness?.stop?.();
  cleanup();
  const token=state.token;state.running=true;state.frames=[];state.last=0;
  const btn=$("toneStart");if(btn)btn.textContent="■ Stop analysis";

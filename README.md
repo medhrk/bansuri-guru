@@ -1,3 +1,21 @@
+# v30 — Guided Raag Improvisation Teacher
+
+Added **🎶 Improvisation** as a standalone, mobile-friendly learning section. It introduces three raags using original exercises and the existing flute Sa reference:
+
+- **Bhupali**: S R G P D (pentatonic; no Ma/Ni), with a listening exercise on G–R–S movement.
+- **Durga**: S R M P D (pentatonic; no Ga/Ni), with Re–Ma and Dha–Ma movements.
+- **Yaman**: S R G M^ P D N, emphasising tivra Ma and Ni–Re–Ga movements; introductory ascent is simplified and contextual.
+
+Four interactive stages: hear aroh/avroh, listen to and play a compact *pakad-study exercise*, compose an original short phrase from the permitted introductory note set (add/undo/clear/example, up to 16 notes), and open that phrase in Sur Quest Learn mode. Playback BPM shortcuts are 40/48/60. Sur Quest scoring measures individual near-target pitches and steady holds; it does **not** determine raag authenticity, improvisation beauty or stylistic artistry. The teacher supplies cautious phrase-building hints.
+
+This section contains original instructional note sequences, not copyrighted melodies or recordings. Raag character depends on pakad, ornaments, emphases, movement and lineage beyond the scale shown; variants exist between schools. No external AI API or new Firebase storage is needed. The editable phrase currently lives only in the open page and is not permanently saved.
+
+Restore branch before v30: https://github.com/medhrk/bansuri-guru/tree/restore/pre-raag-improvisation-v30-2026-11-23
+
+Actual browser audio and production deployment require device testing.
+
+---
+
 # v29 — Interactive Six-Hole Bansuri Fingering Guide
 
 A dedicated **🪈 Fingering** tab now includes a mobile-friendly, six-hole interactive reference with note buttons for S, r, R, g, G, M, M^, P, d, D, n, N and S'. It uses the currently selected flute Sa to calculate target note frequencies and lets learners audition the target tone or launch a short Sur Quest exercise.

@@ -57,6 +57,7 @@ function render(){
   if(!window.surQuest?.startAdaptive){alert("Sur Quest is unavailable. Reload the app.");return}
   tab("quest");window.surQuest.startAdaptive();
  };
+ const interactive=node("button","🎵 Start interactive teacher");interactive.onclick=()=>window.liveBansuriTeacher?.start?.();buttons.append(interactive);
  const copy=node("button","Copy today's plan");copy.onclick=()=>{
   const text=result.routine.map(r=>r.minutes+" min — "+r.title+": "+r.action).join("\n");
   if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>{copy.textContent="✓ Copied"}).catch(()=>{copy.textContent="Copy unavailable"});

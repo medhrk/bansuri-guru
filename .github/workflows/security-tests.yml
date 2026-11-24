@@ -23,5 +23,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Check source syntax
         run: npm run test:syntax
+      - name: Run public configuration and XSS regression smoke tests
+        run: npm run test:smoke
       - name: Test Firestore authorization in emulator
         run: npm run test:rules

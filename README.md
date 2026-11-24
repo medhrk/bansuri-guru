@@ -1,3 +1,24 @@
+# v31 — Phase 1 production-readiness hardening (24 November 2026)
+
+**Status: source implemented, release still controlled beta — NOT fully production verified.**
+
+Authentication hardening:
+- Extracted the public `bansuri-guru` Firebase web configuration already present in the application into `firebase-config.js`, which is now loaded before the Firebase library. Visitors no longer need to paste project IDs or API config. No private credentials were added.
+- First-time login now uses a single initialization path, prioritizes the centrally deployed Firebase project over any stale browser settings, and reports understandable errors for unauthorized hostnames, Google provider disabled, popup blocked/closed and network failure.
+- Firebase Google popup login returns the confirmed account; auth-state changes still update the sign-in/out buttons. Cloud backup remains opt-in and requires an explicit first upload or restore.
+
+Security preparation:
+- Fixed Sur Quest's unsafe HTML insertion for user-controlled song/lesson titles and kinds by rendering text nodes.
+- Added `firebase.json`, `package.json`, and nine Firestore emulator authorization tests in `tests/firestore.rules.test.mjs`, covering guest denial, Alice-vs-Bob private-backup access, public post ownership, missing authorization, forbidden mutations and bad community schemas.
+- Added a GitHub Actions workflow at `.github/workflows/security-tests.yml` to install Node/Java test dependencies, check source syntax and run the Firestore emulator test suite.
+- Added the **production verification checklist**: [docs/PHASE1_RELEASE_GATE.md](docs/PHASE1_RELEASE_GATE.md).
+
+**Before opening registration to everyone:** confirm Google provider and the real `bansuri-guru.medhrk.workers.dev` domain in Firebase Authentication settings, ensure the deployed Firestore rules match `firestore.rules`, review passing CI/emulator tests, and test Google sign-in/backup isolation with two fresh Google accounts and real Android/desktop browsers. Firestore rules, Firebase Console and Cloudflare deployment have **not** been changed or verified remotely in this phase.
+
+Restore source from before v31: https://github.com/medhrk/bansuri-guru/tree/restore/pre-phase1-auth-security-v31-2026-11-24
+
+---
+
 # v30 — Guided Raag Improvisation Teacher
 
 Added **🎶 Improvisation** as a standalone, mobile-friendly learning section. It introduces three raags using original exercises and the existing flute Sa reference:
